@@ -1,0 +1,20 @@
+{
+  "name": "koa-restql",
+  "version": "0.0.1",
+  "description": "Koa RESTful API middleware based on Sequlizejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@git.sankuai.com/mit/koa-restql.git"
+  },
+  "keywords": [
+    "koa",
+    "restful",
+    "sequlizejs"
+  ],
+  "author": "Dale",
+  "license": "ISC"
+}
