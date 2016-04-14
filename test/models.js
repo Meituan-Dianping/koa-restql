@@ -1,28 +1,29 @@
 'use strict';
 
-const chai   = require('chai');
-const debug  = require('debug')('kr:test:models');
 const models = require('../lib/models');
+const common = require('./common');
 
-const assert = chai.assert;
-const expect = chai.expect;
-const should = chai.should;
+const _      = common._;
+const assert = common.assert;
+const debug  = common.debug('kr:test:models');
+
+const loadModels = models.load;
 
 describe('loadModels (path -> models)', function () {
+
   it ('should return a object', function () {
-    let val = models.loadModels('./test/mockModels');
-    expect(val).to.be.a('object');
+    let models = loadModels(common.sequelize);
 
-    let keys = Object.keys(val);
-    expect(keys).to.be.a('array');
-    assert.isAbove(keys.length, 0);
+    let keys = _.keys(models);
+    assert.equal(keys.length, 3);
 
-    keys.forEach((key) => {
-      let model = val[key];
-      expect(model).to.be.a('object');
-      expect(model.name).to.be.a('string');
-      expect(model.attributes).to.be.a('function');
-      expect(model.options).to.be.a('object');
-    });
+    keys.forEach(key => {
+      let model = models[key];
+      debug(model);
+      assert(_.isPlainObject(model));
+      assert(_.isString(model.name));
+      assert(_.isPlainObject(model.attributes));
+      assert(_.isPlainObject(model.associations));
+    })
   })
 })

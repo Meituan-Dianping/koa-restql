@@ -2,26 +2,31 @@
 
 const fs        = require('fs');
 const path      = require('path');
+const _         = require('lodash');
 const debug     = require('debug');
+const assert    = require('assert');
+const config    = require('../config');
 const Sequelize = require('sequelize');
 
-const sequelize = Sequelize(config.database, {
-  logging: debug,
-  underscored: true,
-  underscoredAll: true,
+const sequelize = new Sequelize(config.database, {
+  logging     : debug,
+  underscored : true,
+  underscoredAll : true,
   define: {
-    schemaDelimiter: '_',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt',
-    underscored: true,
-    freezeTableName: true,
+    paranoid    : true,
+    underscored : true,
+    freezeTableName : true,
+    schemaDelimiter : '_',
+    createdAt : 'created_at',
+    updatedAt : 'updated_at',
+    deletedAt : 'deleted_at',
   },
 });
 
-const loadMockModels = (modelsPath) => {
+const models = {};
+const associationModels = [];
 
-  models = models || {};
+const _loadMockModels = (modelsPath) => {
 
   fs.readdirSync(modelsPath).forEach((filename) => {
 
@@ -43,15 +48,29 @@ const loadMockModels = (modelsPath) => {
     let schema     = require(modelPath)
       , name       = filename.match(validNameRegex)[1]
       , options    = schema.options
-      , attributes = schema.attributes(Sequelize);
+      , attributes = schema.attributes(Sequelize)
+      , model      = sequelize.define(name, attributes, options);
 
-    sequelize.define(name, attributes, options);
+    models[name] = model;
+
+    if ('associate' in model)
+      associationModels.push(model);
   });
 }
 
+const loadMockModels = (modelsPath) => {
+
+  _loadMockModels(modelsPath);
+  associationModels.forEach(model => {
+    model.associate(models);
+  })
+}
+
 module.exports = {
+  _,
   path, 
   debug, 
+  assert,
   sequelize,
   Sequelize,
   loadMockModels, 

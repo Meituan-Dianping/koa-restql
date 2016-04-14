@@ -15,7 +15,7 @@ module.exports.attributes = (DataTypes) => {
 module.exports.options = {
 
   indexes: [{
-    unique: true,
+    unique: false,
     fields: ['user_id'],
   }],
 

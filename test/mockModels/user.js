@@ -2,6 +2,11 @@
 
 module.exports.attributes = (DataTypes) => {
   return {
+    id : {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+    },   
+
     login : DataTypes.STRING,
     email : DataTypes.STRING,
   };
@@ -15,9 +20,14 @@ module.exports.options = {
   }],
 
   classMethods: {
-    associations: (models) => {
-      models.mituser.hasOne(models.profile, {
+    associate: (models) => {
+      models.user.hasOne(models.profile, {
         as: 'profile',
+        foreignKey: 'user_id',
+      });
+
+      models.user.hasMany(models.department, {
+        as: 'departments',
         foreignKey: 'user_id',
       });
     }

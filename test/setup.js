@@ -5,10 +5,13 @@ const common = require('./common');
 const debug  = common.debug('kr:test:setup');
 const config = common.config;
 
-before('setup', function () {
+before('setup', function (done) {
 
   let sequelize = common.sequelize;
   common.loadMockModels('./test/mockModels');
 
-  debug('setup');
+  sequelize.sync({
+    force : true,
+  }).then(res => done()).catch(done);
+
 })
