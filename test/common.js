@@ -7,6 +7,7 @@ const debug     = require('debug');
 const assert    = require('assert');
 const config    = require('../config');
 const Sequelize = require('sequelize');
+const Router    = require('koa-router');
 
 const sequelize = new Sequelize(config.database, {
   logging     : debug,
@@ -73,5 +74,6 @@ module.exports = {
   assert,
   sequelize,
   Sequelize,
+  Router,
   loadMockModels, 
 }

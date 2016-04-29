@@ -2,7 +2,10 @@
   "name": "koa-restql",
   "version": "0.0.1",
   "description": "Koa RESTful API middleware based on Sequlizejs",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "export NODE_ENV=test; export DEBUG=; ./node_modules/.bin/mocha --reporter spec --harmony --bail --no-timeouts"
   },
@@ -36,6 +39,9 @@
     "sequlizejs",
     "restful"
   ],
-  "author": "Dale",
+  "engines": {
+    "node": ">5.0.0"
+  },
+  "author": "Dale <daleoooo.z@gmail.com>",
   "license": "ISC"
 }
