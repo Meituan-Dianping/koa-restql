@@ -1,13 +1,13 @@
 'use strict';
 
-const fs            = require('fs');
-const path          = require('path');
-const debug         = require('debug');
-const assert        = require('assert');
-const config        = require('../config');
-const Sequelize     = require('sequelize');
-const Router        = require('koa-router');
-const RoutersConfig = require('../lib/routersConfig');
+const fs           = require('fs');
+const path         = require('path');
+const debug        = require('debug');
+const assert       = require('assert');
+const config       = require('../config');
+const Sequelize    = require('sequelize');
+const Router       = require('koa-router');
+const RoutesConfig = require('../lib/routesConfig');
 
 const sequelize = new Sequelize(config.database, {
   logging     : debug,
@@ -75,5 +75,5 @@ module.exports = {
   Sequelize,
   Router,
   loadMockModels, 
-  RoutersConfig
+  RoutesConfig
 }

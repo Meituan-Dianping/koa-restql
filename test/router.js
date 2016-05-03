@@ -1,17 +1,17 @@
 'use strict';
 
-const models  = require('../lib/models');
-const routers = require('../lib/routers');
-const common  = require('./common');
+const models = require('../lib/models');
+const router = require('../lib/router');
+const common = require('./common');
 
-const assert        = common.assert;
-const Router        = common.Router;
-const RoutersConfig = common.RoutersConfig;
-const debug         = common.debug('kr:test:routers');
+const assert       = common.assert;
+const Router       = common.Router;
+const RoutesConfig = common.RoutesConfig;
+const debug        = common.debug('kr:test:router');
 
-const checkMountCondition = routers.checkMountCondition;
+const checkMountCondition = router.checkMountCondition;
 const loadModels = models.load;
-const loadRouter = routers.load;
+const loadRouter = router.load;
 
 const checkRouter = (router, path, method) => {
 
@@ -25,8 +25,8 @@ const checkRouter = (router, path, method) => {
   if (method.toUpperCase() === 'DEL') 
     method = 'DELETE';
 
-  debug(path);
   debug(method);
+  debug(path);
 
   for (let i = 0; i < stack.length; i ++) {
     let layer = stack[i];
@@ -41,7 +41,7 @@ const checkResourceRouter = (router, path, models, model, opts) => {
   
   opts = opts || {};
 
-  RoutersConfig.methods.forEach(method => {
+  RoutesConfig.methods.forEach(method => {
     if (checkMountCondition(method, opts)) {
       let mountedPath = String.raw`${path}${method.path}`;
       mountedPath = mountedPath.replace(/(\:id|\:\w+_id)/, 1);      
@@ -58,7 +58,7 @@ const checkResourceRouter = (router, path, models, model, opts) => {
       , targetName          = association.target.name
       , isSingleAssociation = association.isSingleAssociation
       , associationModel    = models[targetName]
-      , associationPath     = `:${model.name}_id/${association.as}`;
+      , associationPath     = `2/${association.as}`;
 
     let opts = {
       isAssociation: true,
