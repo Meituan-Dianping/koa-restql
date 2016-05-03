@@ -19,4 +19,12 @@ module.exports.options = {
     fields: ['user_id'],
   }],
 
+  classMethods: {
+    associate: (models) => {
+      models.profile.belongsTo(models.user, {
+        as: 'user',
+        foreignKey: 'user_id'
+      });
+    }
+  }
 };
