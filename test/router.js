@@ -1,15 +1,16 @@
 'use strict';
 
 const router = require('../lib/router');
-const common = require('./common');
+const common = require('../lib/common');
+const test   = require('./common');
 
-const assert   = common.assert;
-const Router   = common.Router;
-const defaults = common.defaults;
-const debug    = common.debug('kr:test:router');
+const assert  = test.assert;
+const Router  = test.Router;
+const methods = test.methods;
+const debug   = test.debug('koa-restql:test:router');
 
-const shouldMount = router.shouldMount;
-const loadRouter  = router.load;
+const loadRouter         = router.load;
+const methodShouldMount  = router.methodShouldMount;
 
 const checkRoute = (router, path, method) => {
 
@@ -37,118 +38,76 @@ const checkRoute = (router, path, method) => {
 
 const checkModelRoutes = (router, path, models, model, association) => {
   
-  defaults.methods.forEach(method => {
-    if (shouldMount(method, association)) {
+  let paths = [ path ];
 
-      let _path = String.raw`/${path}${method.path}`;
-      _path = _path.replace(/(\:id|\:\w+_id)/, 1);      
+  if (!association || !path.isSingular) {
+    let id = !association ? ':id' : ':associationId';
+    paths.push({ name: `${path.name}/${id}`, isSingular: true });
+  }
 
-      assert(checkRoute(router, _path, method.name));
-    }
+  paths.forEach(path => {
+    methods.forEach(method => {
+      let pathName = path.name.slice().replace(/(\:id|\:associationId)/, 1);      
+      if (methodShouldMount(path, method)) {
+        assert(checkRoute(router, pathName, method.name));
+      } else {
+        assert(!checkRoute(router, pathName, method.name));
+      }
+    })
   })
 
   if (association || !model.associations)
     return; 
-  
+
   Object.keys(model.associations).forEach(key => {
 
     let association = model.associations[key]
-      , name        = association.options.name
-      , _path       = `${path}/:${model.name}_id/`;
-
-    _path += association.isSingleAssociation ? name.singular : name.plural;
-
-    checkModelRoutes(router, `${_path}`, models, model, association);
+      , isSingular  = association.isSingleAssociation
+      , pathName    = paths[1].name.slice();
+    
+    pathName += `/${common.getAssociationName(association)}`;
+    checkModelRoutes(router, { name: pathName, isSingular }, models, model, association);
   })
 }
 
-describe ('loadRouter (models -> router)', function () {
-  describe ('shouldMount (method, association -> boolean)', function () {
+describe.only ('loadRouter (models -> router)', function () {
+  describe.only ('methodShouldMount (path, method) -> boolean', function () {
     it ('should return true', function () {
-      assert(shouldMount());
-    })
+      assert(methodShouldMount({ isSingular: true }, {}));
+    })  
 
     it ('should return true', function () {
-      let mount = {
-        association : true
-      };
-      assert(shouldMount({ mount }));
-    })
+      assert(methodShouldMount({ isSingular: true }, {}));
+    })  
 
     it ('should return true', function () {
-      let mount = {
-        association: true
-      };
+      assert(methodShouldMount({ isSingular: true }, { isSingular: true }));
+    })  
 
-      assert(shouldMount({ mount }, {}));
-    })
+    it ('should return true', function () {
+      assert(methodShouldMount({ isSingular: false }, { isSingular: false }));
+    })  
 
     it ('should return false', function () {
-      let mount = {
-        associationOnly: true
-      };
-      assert(!shouldMount({ mount }));
-    })
-
-    it ('should return true', function () {
-      let mount = {
-        associationOnly: true
-      };
-      assert(shouldMount({ mount }, {}));
-    })
-
-    it ('should return true', function () {
-      let mount = {
-        association: true
-      };
-      let association = {
-        isSingleAssociation: true
-      };
-      assert(shouldMount({ mount }, {}));
-    })
-
-    it ('should return true', function () {
-      let mount = {
-        association: true
-      };
-      assert(shouldMount({ mount }, {}));
-    })
+      assert(!methodShouldMount({ isSingular: true }, { isSingular: false }));
+    })  
 
     it ('should return false', function () {
-      let mount = {
-        association: true,
-        pluralModelOnly: true
-      };
-      let association = {
-        isSingleAssociation: true
-      };
-      assert(!shouldMount({ mount }, association));
-    })
+      assert(!methodShouldMount({ isSingular: false }, { isSingular: true }));
+    })  
 
-    it ('should return true', function () {
-      let mount = {
-        association: true,
-        singleModelOnly: true
-      };
-      assert(!shouldMount({ mount }, {}));
-    })
+    it ('should return false', function () {
+      assert(!methodShouldMount({ }, { isSingular: false }));
+    })  
 
-    it ('should return true', function () {
-      let mount = {
-        association: true,
-        singleModelOnly: true
-      };
-      let association = {
-        isSingleAssociation: true
-      };
-      assert(shouldMount({ mount }, association));
-    })
-
+    it ('should return false', function () {
+      assert(!methodShouldMount({ }, { isSingular: true }));
+    })  
   })
 
   it ('should return a object', function () {
 
-    let models = common.sequelize.models
+    let models = test.sequelize.models
       , router = loadRouter(models)
       , stack  = router.stack;
       
@@ -158,7 +117,8 @@ describe ('loadRouter (models -> router)', function () {
     Object.keys(models).forEach(key => {
       let model = models[key]
         , path  = `${key}`
-      checkModelRoutes(router, path, models, model);
+
+      checkModelRoutes(router, { name: path, isSingular: false }, models, model);
     })
   })
 })

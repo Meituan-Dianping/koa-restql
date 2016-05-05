@@ -12,10 +12,11 @@ const Sequelize = require('sequelize');
 const Router    = require('koa-router');
 
 const mock      = require('./mock/data');
-const config    = require('../config');
-const defaults  = require('../lib/defaults');
+const methods   = require('../lib/methods');
 
-const sequelize = new Sequelize(config.database, {
+const database  = "mysql://koa-restql-test:test@localhost/koa-restql-test#UT8";
+
+const sequelize = new Sequelize(database, {
   logging        : debug,
   underscored    : true,
   underscoredAll : true,
@@ -94,7 +95,7 @@ module.exports = {
   debug, 
   http, 
   assert,
-  defaults,
+  methods,
   sequelize,
   Sequelize,
   request,

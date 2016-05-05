@@ -1,6 +1,6 @@
 'use strict'
 
-const Restql = require('../lib/index');
+const Restql = require('../lib/Restql');
 const common = require('./common');
 
 const koa     = common.koa;
