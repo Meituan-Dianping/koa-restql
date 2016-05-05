@@ -1,17 +1,17 @@
 'use strict';
 
+const mock   = require('./mock/data');
 const common = require('./common');
+const debug  = common.debug('koa-restql:test:setup');
 
-const debug  = common.debug('kr:test:setup');
-const config = common.config;
-
-before('setup', function (done) {
+before ('db setup', function (done) {
 
   let sequelize = common.sequelize;
-  common.loadMockModels('./test/mockModels');
 
   sequelize.sync({
     force : true,
-  }).then(res => done()).catch(done);
-
+  }).then(res => {
+    common.loadMockData();
+    done();
+  }).catch(done);
 })

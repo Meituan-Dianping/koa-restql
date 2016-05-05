@@ -4,6 +4,7 @@ module.exports.attributes = (DataTypes) => {
   return {
     id : {
       type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
     },   
 
@@ -15,8 +16,16 @@ module.exports.attributes = (DataTypes) => {
 module.exports.options = {
 
   indexes: [{
-    unique: false,
+    unique: true,
     fields: ['user_id'],
   }],
 
+  classMethods: {
+    associate: (models) => {
+      models.profile.belongsTo(models.user, {
+        as: 'user',
+        foreignKey: 'user_id'
+      });
+    }
+  }
 };

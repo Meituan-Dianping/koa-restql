@@ -4,12 +4,12 @@ module.exports.attributes = (DataTypes) => {
   return {
     id : {
       type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true
     },   
 
-    company_id : DataTypes.INTEGER,
-    login      : DataTypes.STRING,
-    email      : DataTypes.STRING
+    login : DataTypes.STRING,
+    email : DataTypes.STRING
   };
 }
 
@@ -36,8 +36,8 @@ module.exports.options = {
         as: 'tags',
         through: {
           model: models.user_tags,
-        foreignKey: 'user_id',
-        otherKey: 'tag_id'
+          foreignKey: 'user_id',
+          otherKey: 'tag_id'
         }
       })
     }

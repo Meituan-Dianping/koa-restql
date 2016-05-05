@@ -51,8 +51,12 @@ const checkModelRoutes = (router, path, models, model, association) => {
     return; 
   
   Object.keys(model.associations).forEach(key => {
+
     let association = model.associations[key]
-      , _path       = `${path}/:${model.name}_id/${association.as}`;
+      , name        = association.options.name
+      , _path       = `${path}/:${model.name}_id/`;
+
+    _path += association.isSingleAssociation ? name.singular : name.plural;
 
     checkModelRoutes(router, `${_path}`, models, model, association);
   })

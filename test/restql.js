@@ -11,7 +11,7 @@ const assert  = common.assert;
 const request = common.request;
 const debug   = common.debug('koa-restql:test:restql');
 
-describe.only ('Restql', function () {
+describe ('Restql', function () {
   it ('creates new restql', function (done) {
    
     let restql = new Restql(common.sequelize.models);
@@ -45,6 +45,28 @@ describe.only ('Restql', function () {
     it ('should return an object', function (done) {
       server
         .get('/user/1')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          debug(res.body);
+          done();
+        })
+    })
+    
+    it ('should return an object', function (done) {
+      server
+        .get('/user/1/profile')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          debug(res.body);
+          done();
+        })
+    })
+
+    it ('should return an object', function (done) {
+      server
+        .get('/user/1/departments')
         .expect(200)
         .end(function (err, res) {
           if (err) return done(err);

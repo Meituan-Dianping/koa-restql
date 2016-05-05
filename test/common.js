@@ -7,11 +7,13 @@ const path      = require('path');
 const http      = require('http');
 const debug     = require('debug');
 const assert    = require('assert');
-const config    = require('../config');
-const defaults  = require('../lib/defaults');
 const request   = require('supertest');
 const Sequelize = require('sequelize');
 const Router    = require('koa-router');
+
+const mock      = require('./mock/data');
+const config    = require('../config');
+const defaults  = require('../lib/defaults');
 
 const sequelize = new Sequelize(config.database, {
   logging        : debug,
@@ -31,7 +33,7 @@ const sequelize = new Sequelize(config.database, {
 const models = {};
 const associationModels = [];
 
-const _loadMockModels = (modelsPath) => {
+const loadMockModels = (modelsPath) => {
 
   fs.readdirSync(modelsPath).forEach((filename) => {
 
@@ -46,7 +48,7 @@ const _loadMockModels = (modelsPath) => {
 
     // load model recursively
     if (isDirectory) {
-      models[filename] = _loadModels(models, modelPath);
+      models[filename] = loadModels(models, modelPath);
       return;
     }       
     
@@ -63,13 +65,27 @@ const _loadMockModels = (modelsPath) => {
   });
 }
 
-const loadMockModels = (modelsPath) => {
+const loadMockData = () => {
+  let models = sequelize.models;
 
-  _loadMockModels(modelsPath);
-  associationModels.forEach(model => {
-    model.associate(models);
+  Object.keys(mock).forEach(key => {
+    let data  = mock[key]
+      , model = models[key];
+
+    model.truncate({
+      cascade: true
+    });
+
+    data.forEach(row => {
+      model.create(row);
+    })
   })
 }
+
+loadMockModels('test/mock/models');
+associationModels.forEach(model => {
+  model.associate(models);
+})
 
 module.exports = {
   koa,
@@ -83,5 +99,5 @@ module.exports = {
   Sequelize,
   request,
   Router,
-  loadMockModels, 
+  loadMockData,
 }
