@@ -58,7 +58,7 @@ const checkModelRoutes = (router, path, models, model, association) => {
   })
 }
 
-describe.only ('loadRouter (models -> router)', function () {
+describe ('loadRouter (models -> router)', function () {
   describe ('shouldMount (method, association -> boolean)', function () {
     it ('should return true', function () {
       assert(shouldMount());

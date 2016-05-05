@@ -11,34 +11,62 @@ const assert  = common.assert;
 const request = common.request;
 const debug   = common.debug('koa-restql:test:restql');
 
-describe ('Restql', function () {
+describe.only ('Restql', function () {
   it ('creates new restql', function (done) {
    
-    let restql = new Restql({
-      sequelize: common.sequelize
-    });
+    let restql = new Restql(common.sequelize.models);
 
     assert(restql instanceof Restql);
     done();
   })
 
-  describe ('mounts restql router', function () {
+  describe ('middlewares', function () {
     let server;
 
     before (function () {
       let app = koa();
-      let restql = new Restql({
-        sequelize: common.sequelize
-      });
+      let restql = new Restql(common.sequelize.models)
 
       app.use(restql.routes());
-      debug(restql.routes().router);
       server = request(http.createServer(app.callback()));
     })
 
     it ('should return an object', function (done) {
       server
+        .get('/user')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          debug(res.body);
+          done();
+        })
+    })
+
+    it ('should return an object', function (done) {
+      server
+        .get('/user/1')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          debug(res.body);
+          done();
+        })
+    })
+
+    it ('should return an object', function (done) {
+      server
         .get('/user/1/tags')
+        .expect(200)
+        .end(function (err, res) {
+          if (err) return done(err);
+          debug(res.body);
+          done();
+        })
+    })
+
+    it ('should return an object', function (done) {
+      server
+        .get('/user/1/tags/1')
         .expect(200)
         .end(function (err, res) {
           if (err) return done(err);
