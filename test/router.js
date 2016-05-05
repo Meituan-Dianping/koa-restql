@@ -1,19 +1,17 @@
 'use strict';
 
-const models = require('../lib/models');
 const router = require('../lib/router');
 const common = require('./common');
 
-const assert       = common.assert;
-const Router       = common.Router;
-const RoutesConfig = common.RoutesConfig;
-const debug        = common.debug('kr:test:router');
+const assert   = common.assert;
+const Router   = common.Router;
+const defaults = common.defaults;
+const debug    = common.debug('kr:test:router');
 
-const checkMountCondition = router.checkMountCondition;
-const loadModels = models.load;
-const loadRouter = router.load;
+const shouldMount = router.shouldMount;
+const loadRouter  = router.load;
 
-const checkRouter = (router, path, method) => {
+const checkRoute = (router, path, method) => {
 
   if (!router.stack) {
     debug(router.stack);
@@ -37,140 +35,117 @@ const checkRouter = (router, path, method) => {
   return false;
 }
 
-const checkResourceRouter = (router, path, models, model, opts) => {
+const checkModelRoutes = (router, path, models, model, association) => {
   
-  opts = opts || {};
+  defaults.methods.forEach(method => {
+    if (shouldMount(method, association)) {
 
-  RoutesConfig.methods.forEach(method => {
-    if (checkMountCondition(method, opts)) {
-      let mountedPath = String.raw`${path}${method.path}`;
-      mountedPath = mountedPath.replace(/(\:id|\:\w+_id)/, 1);      
-      assert(checkRouter(router, mountedPath, method.name));
+      let _path = String.raw`/${path}${method.path}`;
+      _path = _path.replace(/(\:id|\:\w+_id)/, 1);      
+
+      assert(checkRoute(router, _path, method.name));
     }
   })
 
-  let associations = model.associations;
-  if (opts.isAssociation || !model.associations)
+  if (association || !model.associations)
     return; 
   
   Object.keys(model.associations).forEach(key => {
-    let association         = model.associations[key]
-      , targetName          = association.target.name
-      , isSingleAssociation = association.isSingleAssociation
-      , associationModel    = models[targetName]
-      , associationPath     = `2/${association.as}`;
+    let association = model.associations[key]
+      , _path       = `${path}/:${model.name}_id/${association.as}`;
 
-    let opts = {
-      isAssociation: true,
-      isSingleAssociation,  
-    }
-    
-    checkResourceRouter(router, `${path}/${associationPath}`, models, associationModel, opts);
+    checkModelRoutes(router, `${_path}`, models, model, association);
   })
 }
 
-describe('loadRouter (models -> router)', function () {
-  describe ('checkMountCondition (method, opts -> boolean)', function () {
+describe.only ('loadRouter (models -> router)', function () {
+  describe ('shouldMount (method, association -> boolean)', function () {
     it ('should return true', function () {
-      assert(checkMountCondition());
+      assert(shouldMount());
     })
 
     it ('should return true', function () {
-      let isMounted = {
+      let mount = {
         association : true
       };
-      assert(checkMountCondition({ isMounted }));
+      assert(shouldMount({ mount }));
     })
 
     it ('should return true', function () {
-      let isMounted = {
+      let mount = {
         association: true
       };
-      let opts = {
-        isAssociation: true
-      };
-      assert(checkMountCondition({ isMounted }, opts));
+
+      assert(shouldMount({ mount }, {}));
     })
 
     it ('should return false', function () {
-      let isMounted = {
+      let mount = {
         associationOnly: true
       };
-      assert(!checkMountCondition({ isMounted }));
+      assert(!shouldMount({ mount }));
     })
 
     it ('should return true', function () {
-      let isMounted = {
+      let mount = {
         associationOnly: true
       };
-      let opts = {
-        isAssociation: true
-      };
-      assert(checkMountCondition({ isMounted }, opts));
+      assert(shouldMount({ mount }, {}));
     })
 
     it ('should return true', function () {
-      let isMounted = {
+      let mount = {
         association: true
       };
-      let opts = {
-        isAssociation: true,
+      let association = {
         isSingleAssociation: true
       };
-      assert(checkMountCondition({ isMounted }, opts));
+      assert(shouldMount({ mount }, {}));
     })
 
     it ('should return true', function () {
-      let isMounted = {
+      let mount = {
         association: true
       };
-      let opts = {
-        isAssociation: true,
-      };
-      assert(checkMountCondition({ isMounted }, opts));
+      assert(shouldMount({ mount }, {}));
     })
 
     it ('should return false', function () {
-      let isMounted = {
+      let mount = {
         association: true,
-        pluralResourceOnly: true
+        pluralModelOnly: true
       };
-      let opts = {
-        isAssociation: true,
+      let association = {
         isSingleAssociation: true
       };
-      assert(!checkMountCondition({ isMounted }, opts));
+      assert(!shouldMount({ mount }, association));
     })
 
     it ('should return true', function () {
-      let isMounted = {
+      let mount = {
         association: true,
-        singleResourceOnly: true
+        singleModelOnly: true
       };
-      let opts = {
-        isAssociation: true
-      };
-      assert(!checkMountCondition({ isMounted }, opts));
+      assert(!shouldMount({ mount }, {}));
     })
 
     it ('should return true', function () {
-      let isMounted = {
+      let mount = {
         association: true,
-        singleResourceOnly: true
+        singleModelOnly: true
       };
-      let opts = {
-        isAssociation: true,
+      let association = {
         isSingleAssociation: true
       };
-      assert(checkMountCondition({ isMounted }, opts));
+      assert(shouldMount({ mount }, association));
     })
 
   })
 
   it ('should return a object', function () {
 
-    let models = loadModels(common.sequelize)
-      , router = loadRouter(new Router(), models, {})
+    let models = common.sequelize.models
+      , router = loadRouter(models)
       , stack  = router.stack;
       
     assert(stack.length > 0);
@@ -179,7 +154,7 @@ describe('loadRouter (models -> router)', function () {
     Object.keys(models).forEach(key => {
       let model = models[key]
         , path  = `${key}`
-      checkResourceRouter(router, path, models, model);
+      checkModelRoutes(router, path, models, model);
     })
   })
 })

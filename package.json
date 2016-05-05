@@ -19,6 +19,7 @@
     "co-body": "^4.0.0",
     "yaku": "^0.15.9",
     "moment": "^2.11.1",
+    "path-to-regexp": "^1.2.1",
     "debug": "^2.2.0"
   },
   "devDependencies": {

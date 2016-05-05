@@ -1,26 +1,30 @@
 'use strict';
 
-const fs           = require('fs');
-const path         = require('path');
-const debug        = require('debug');
-const assert       = require('assert');
-const config       = require('../config');
-const Sequelize    = require('sequelize');
-const Router       = require('koa-router');
-const RoutesConfig = require('../lib/routesConfig');
+const fs        = require('fs');
+const koa       = require('koa');
+const util      = require('util');
+const path      = require('path');
+const http      = require('http');
+const debug     = require('debug');
+const assert    = require('assert');
+const config    = require('../config');
+const defaults  = require('../lib/defaults');
+const request   = require('supertest');
+const Sequelize = require('sequelize');
+const Router    = require('koa-router');
 
 const sequelize = new Sequelize(config.database, {
-  logging     : debug,
-  underscored : true,
+  logging        : debug,
+  underscored    : true,
   underscoredAll : true,
   define: {
-    paranoid    : true,
-    underscored : true,
+    paranoid        : true,
+    underscored     : true,
     freezeTableName : true,
     schemaDelimiter : '_',
-    createdAt : 'created_at',
-    updatedAt : 'updated_at',
-    deletedAt : 'deleted_at',
+    createdAt       : 'created_at',
+    updatedAt       : 'updated_at',
+    deletedAt       : 'deleted_at',
   },
 });
 
@@ -68,12 +72,16 @@ const loadMockModels = (modelsPath) => {
 }
 
 module.exports = {
+  koa,
   path, 
+  util,
   debug, 
+  http, 
   assert,
+  defaults,
   sequelize,
   Sequelize,
+  request,
   Router,
   loadMockModels, 
-  RoutesConfig
 }
