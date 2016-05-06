@@ -12,19 +12,3 @@ module.exports.attributes = (DataTypes) => {
     tag_id  : DataTypes.INTEGER
   }
 }
-
-module.exports.options = {
-
-  classMethods: {
-    associate: (models) => {
-      models.tag.belongsToMany(models.user, {
-        as: 'users',
-        through: {
-          model: models.user_tags,
-          foreignKey: 'tag_id',
-          otherKey: 'user_id'
-        }
-      })
-    }
-  }
-}

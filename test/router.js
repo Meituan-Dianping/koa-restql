@@ -62,7 +62,7 @@ const checkModelRoutes = (router, path, models, model, association) => {
   Object.keys(model.associations).forEach(key => {
 
     let association = model.associations[key]
-      , isSingular  = association.isSingleAssociation
+      , isSingular  = !! association.isSingleAssociation
       , pathName    = paths[1].name.slice();
     
     pathName += `/${common.getAssociationName(association)}`;

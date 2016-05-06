@@ -8,10 +8,7 @@ before ('db setup', function (done) {
 
   let sequelize = common.sequelize;
 
-  sequelize.sync({
-    force : true,
-  }).then(res => {
-    common.loadMockData();
+  common.loadMockData().then(res => {
     done();
   }).catch(done);
 })

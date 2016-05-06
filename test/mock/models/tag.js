@@ -23,6 +23,7 @@ module.exports.options = {
     associate: (models) => {
       models.tag.belongsToMany(models.user, {
         as: 'users',
+        constraints: false,
         through: {
           model: models.user_tags,
           foreignKey: 'tag_id',

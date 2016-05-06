@@ -67,19 +67,22 @@ const loadMockModels = (modelsPath) => {
 }
 
 const loadMockData = () => {
-  let models = sequelize.models;
+  let models   = sequelize
+    , promises = [];
 
-  Object.keys(mock).forEach(key => {
-    let data  = mock[key]
-      , model = models[key];
+  return sequelize.sync({
+    force: true
+  }).then(() => {
+    Object.keys(mock).forEach(key => {
+      let data  = mock[key]
+        , model = sequelize.models[key];
 
-    model.truncate({
-      cascade: true
-    });
-
-    data.forEach(row => {
-      model.create(row);
+      promises.push(Promise.all(data.map(
+        row => model.create(row)
+      )));
     })
+
+    return Promise.all(promises);
   })
 }
 
