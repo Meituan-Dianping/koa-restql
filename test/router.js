@@ -70,8 +70,8 @@ const checkModelRoutes = (router, path, models, model, association) => {
   })
 }
 
-describe.only ('loadRouter (models -> router)', function () {
-  describe.only ('methodShouldMount (path, method) -> boolean', function () {
+describe ('loadRouter (models -> router)', function () {
+  describe ('methodShouldMount (path, method) -> boolean', function () {
     it ('should return true', function () {
       assert(methodShouldMount({ isSingular: true }, {}));
     })  
@@ -116,7 +116,7 @@ describe.only ('loadRouter (models -> router)', function () {
       
     Object.keys(models).forEach(key => {
       let model = models[key]
-        , path  = `${key}`
+        , path  = `/${key}`
 
       checkModelRoutes(router, { name: path, isSingular: false }, models, model);
     })
