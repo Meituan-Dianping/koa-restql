@@ -13,7 +13,7 @@ const models  = common.sequelize.models;
 const debug   = common.debug('koa-restql:test:restql');
 
 describe ('Restql', function () {
-  it ('creates new Restql', function (done) {
+  it ('should create new Restql', function (done) {
    
     let restql = new Restql(common.sequelize.models);
 
@@ -48,7 +48,7 @@ describe ('Restql', function () {
      * without association
      */
 
-    it ('should get a user array', function (done) {
+    it ('should get user array', function (done) {
       
       server
         .get('/user')
@@ -63,7 +63,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return a user identified by 1', function (done) {
+    it ('should get an user', function (done) {
       
       server
         .get('/user/1')
@@ -78,7 +78,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return a updated user identified by 1', function (done) {
+    it ('should update an user', function (done) {
       
       let data = {
         login : 'sam',
@@ -106,7 +106,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return a new user', function (done) {
+    it ('should create an user', function (done) {
       
       let data = {
         login : 'dean',
@@ -133,7 +133,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should delete a user', function (done) {
+    it ('should delete an user', function (done) {
 
       server
         .delete('/user/1')
@@ -155,7 +155,7 @@ describe ('Restql', function () {
      * hasOne association
      */
     
-    it ('should return a user profile', function (done) {
+    it ('should get user profile', function (done) {
 
       server
         .get('/user/1/profile')
@@ -170,7 +170,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return a updated profile', function (done) {
+    it ('should update user profile', function (done) {
 
       let data = {
         description: 'I am updated'
@@ -194,7 +194,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return a new profile', function (done) {
+    it ('should create user profile', function (done) {
       
       let data = {
         description: 'I am updated'
@@ -239,7 +239,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should delete a user profile', function (done) {
+    it ('should delete user profile', function (done) {
 
       server
         .delete('/user/1/profile')
@@ -264,7 +264,7 @@ describe ('Restql', function () {
      * belongsTo association
      */
 
-    it ('should return a user', function (done) {
+    it ('should get profile user', function (done) {
 
       server
         .get('/profile/1/user')
@@ -279,7 +279,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return a updated user', function (done) {
+    it ('should update profile user', function (done) {
 
       let data = {
         login: 'dale ZHANG'
@@ -303,7 +303,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return a new profile user', function (done) {
+    it ('should create profile user', function (done) {
       
       let profile = {
         description: 'I am new'
@@ -349,7 +349,7 @@ describe ('Restql', function () {
           })
     })
 
-    it ('should delete a profile user', function (done) {
+    it ('should delete profile user', function (done) {
 
       server
         .delete('/profile/1/user')
@@ -374,7 +374,7 @@ describe ('Restql', function () {
      * hasMany association
      */
 
-    it ('should return an user department array', function (done) {
+    it ('should get user department array', function (done) {
 
       server
         .get('/user/1/departments')
@@ -389,7 +389,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should return an new user department', function (done) {
+    it ('should create an user department', function (done) {
 
       let data = {
         description : 'Seaview, Beach Patio, Dog'
@@ -413,7 +413,7 @@ describe ('Restql', function () {
         })    
     })
 
-    it ('should get a user department', function (done) {
+    it ('should get an user department', function (done) {
       
       server
         .get('/user/1/departments/1')
@@ -427,7 +427,7 @@ describe ('Restql', function () {
         })    
     })
 
-    it ('should update a user department', function (done) {
+    it ('should update an user department', function (done) {
 
       let data = {
         description : 'Seaview, Beach Patio, Dog'
@@ -450,7 +450,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should delete a user department', function (done) {
+    it ('should delete an user department', function (done) {
 
       server
         .delete('/user/1/departments/1')
@@ -471,7 +471,7 @@ describe ('Restql', function () {
      * belongsToMany association
      */
 
-    it ('should return an user tags array', function (done) {
+    it ('should get user tags array', function (done) {
 
       server
         .get('/user/1/tags')
@@ -509,7 +509,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should get a user tag', function (done) {
+    it ('should get an user tag', function (done) {
       
       server
         .get('/user/1/tags/1')
@@ -523,7 +523,7 @@ describe ('Restql', function () {
         })    
     })
 
-    it ('should update a user tag', function (done) {
+    it ('should update an user tag', function (done) {
 
       let data = {
         name: 'MIT'
@@ -546,7 +546,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should delete a user tag', function (done) {
+    it ('should delete an user tag', function (done) {
 
       server
         .delete('/user/1/tags/1')
@@ -569,10 +569,26 @@ describe ('Restql', function () {
     })
 
     /*
-     * query string
+     * query string where
      */
 
-    it ('should get a user array with query where', function (done) {
+    it ('should get an user array with query where', function (done) {
+      
+      server
+        .get('/user?id=1')
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 1);
+          assert(body[0].id === 1);
+          done();
+        })
+    })
+
+    it ('should get an user array with query where', function (done) {
       
       server
         .get('/user?id[]=1&id[]=2')
@@ -602,10 +618,68 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should get a user array with attributes', function (done) {
+    /*
+     * query string attributes
+     */
+
+    it ('should get usre array with query attribute', function (done) {
       
       server
-        .get('/user/1/tags?_attrs[]=name')
+        .get('/user?_attrs=id')
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 2);
+          body.forEach(user => {
+            assert(!user.login);
+            assert(user.id);
+          })
+          done();
+        })
+    })
+
+    it ('should get user array with query attributes', function (done) {
+      
+      server
+        .get('/user?_attrs[]=id&_attrs[]=login')
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 2);
+          body.forEach(user => {
+            assert(user.id);
+            assert(user.login);
+          })
+          done();
+        })
+    })
+
+    it ('should get an user with query attribute', function (done) {
+      
+      server
+        .get('/user/1?_attrs=id')
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(typeof body === 'object');
+          debug(body);
+          debug(!body.login);
+          debug(body.id);
+          done();
+        })
+    })
+
+    it ('should get user tag array with query attribute', function (done) {
+      
+      server
+        .get('/user/1/tags?_attrs=name')
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -621,22 +695,51 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should get a user array with order', function (done) {
+    /*
+     * query string order
+     */
+
+    it ('should get tags array with order', function (done) {
       
       server
-        .get('/user/1/tags?_order=id DESC')
+        .get('/tag?_order=id DESC')
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
           assert(Array.isArray(body));
           debug(body);
-          assert(body.length === 3);
+          assert(body.length === 5);
+
+          for (let i = 1; i < body.length; i ++) {
+            assert(body[i-1].id > body[i].id);
+          }
+
           done();
         })
     })
 
-    it.only ('should get a user array with orders', function (done) {
+    it ('should get tags array with orders', function (done) {
+      
+      server
+        .get('/tag?_order[]=id DESC&_order[]=name ASC')
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 5);
+
+          for (let i = 1; i < body.length; i ++) {
+            assert(body[i-1].id > body[i].id);
+          }
+
+          done();
+        })
+    })
+
+    it ('should get user tag array with orders', function (done) {
       
       server
         .get('/user/1/tags?_order[]=id DESC&_order[]=name ASC')
