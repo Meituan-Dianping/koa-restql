@@ -9,6 +9,7 @@ module.exports.attributes = (DataTypes) => {
     },   
 
     user_id : DataTypes.INTEGER,
-    tag_id  : DataTypes.INTEGER
+    tag_id  : DataTypes.INTEGER,
+    status  : DataTypes.INTEGER
   }
 }

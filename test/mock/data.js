@@ -26,11 +26,11 @@ module.exports = {
   ],
 
   user_tags: [
-    { user_id: 1, tag_id: 1 },
-    { user_id: 1, tag_id: 2 },
-    { user_id: 1, tag_id: 5 },
-    { user_id: 2, tag_id: 3 },
-    { user_id: 2, tag_id: 4 },
-    { user_id: 2, tag_id: 5 }
+    { user_id: 1, tag_id: 1, status: 1 },
+    { user_id: 1, tag_id: 2, status: 1 },
+    { user_id: 1, tag_id: 5, status: 2 },
+    { user_id: 2, tag_id: 3, status: 2 },
+    { user_id: 2, tag_id: 4, status: 2 },
+    { user_id: 2, tag_id: 5, status: 1 }
   ]
 }

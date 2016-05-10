@@ -12,6 +12,18 @@ const request = common.request;
 const models  = common.sequelize.models;
 const debug   = common.debug('koa-restql:test:restql');
 
+const qs = require('qs');
+
+describe ('qs', function () {
+  debug(decodeURIComponent(qs.stringify({
+    _sorts : [
+      ['id', 'ASC'],
+      ['name', 'ASC']
+    ],
+    _sort : ['id', 'ASC']
+  })));
+})
+
 describe ('Restql', function () {
   it ('should create new Restql', function (done) {
    
@@ -625,7 +637,7 @@ describe ('Restql', function () {
     it ('should get usre array with query attribute', function (done) {
       
       server
-        .get('/user?_attrs=id')
+        .get('/user?_attributes=id')
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -644,7 +656,7 @@ describe ('Restql', function () {
     it ('should get user array with query attributes', function (done) {
       
       server
-        .get('/user?_attrs[]=id&_attrs[]=login')
+        .get('/user?_attributes[]=id&_attributes[]=login')
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -663,7 +675,7 @@ describe ('Restql', function () {
     it ('should get an user with query attribute', function (done) {
       
       server
-        .get('/user/1?_attrs=id')
+        .get('/user/1?_attributes=id')
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -679,7 +691,7 @@ describe ('Restql', function () {
     it ('should get user tag array with query attribute', function (done) {
       
       server
-        .get('/user/1/tags?_attrs=name')
+        .get('/user/1/tags?_attributes=name')
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -757,6 +769,29 @@ describe ('Restql', function () {
 
           done();
         })
+
+    })
+
+    it.only ('should get user tag array with through', function (done) {
+      
+      server
+        .get('/user/1/tags?_through.where.status=1')
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 2);
+
+          body.forEach(tag => {
+            assert(tag.user_tags);
+            assert(tag.user_tags.status === 1);
+          })
+
+          done();
+        })
+
     })
   })
 })
