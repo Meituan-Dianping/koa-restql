@@ -116,7 +116,12 @@ describe ('loadRouter (models -> router)', function () {
       
     Object.keys(models).forEach(key => {
       let model = models[key]
-        , path  = `/${key}`
+      , schema = model.options.schema
+      , path   = `/${key}`;
+
+      if (schema) {
+        path = `/${schema}${path}`;
+      }
 
       checkModelRoutes(router, { name: path, isSingular: false }, models, model);
     })

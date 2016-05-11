@@ -931,6 +931,28 @@ describe ('Restql', function () {
           })
           done();
         })
+
+    })
+    
+    /*
+     * with schema
+     */
+    it ('should get car array', function (done) {
+
+      server
+        .get(`/schema/car`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          debug(body);
+          assert(Array.isArray(body));
+          assert(body.length === 2);
+          body.forEach(car => {
+            assert(car.name);
+          })
+          done();
+        })
     })
   })
 })
