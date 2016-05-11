@@ -12,10 +12,11 @@ const Sequelize = require('sequelize');
 const Router    = require('koa-router');
 
 const mock      = require('./mock/data');
-const config    = require('../config');
-const defaults  = require('../lib/defaults');
+const methods   = require('../lib/methods');
 
-const sequelize = new Sequelize(config.database, {
+const database  = "mysql://koa-restql-test:test@localhost/koa-restql-test#UT8";
+
+const sequelize = new Sequelize(database, {
   logging        : debug,
   underscored    : true,
   underscoredAll : true,
@@ -66,19 +67,22 @@ const loadMockModels = (modelsPath) => {
 }
 
 const loadMockData = () => {
-  let models = sequelize.models;
+  let models   = sequelize
+    , promises = [];
 
-  Object.keys(mock).forEach(key => {
-    let data  = mock[key]
-      , model = models[key];
+  return sequelize.sync({
+    force: true
+  }).then(() => {
+    Object.keys(mock).forEach(key => {
+      let data  = mock[key]
+        , model = sequelize.models[key];
 
-    model.truncate({
-      cascade: true
-    });
-
-    data.forEach(row => {
-      model.create(row);
+      promises.push(Promise.all(data.map(
+        row => model.create(row)
+      )));
     })
+
+    return Promise.all(promises);
   })
 }
 
@@ -94,7 +98,7 @@ module.exports = {
   debug, 
   http, 
   assert,
-  defaults,
+  methods,
   sequelize,
   Sequelize,
   request,

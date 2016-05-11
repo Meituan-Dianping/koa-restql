@@ -24,7 +24,8 @@ module.exports.options = {
     associate: (models) => {
       models.profile.belongsTo(models.user, {
         as: 'user',
-        foreignKey: 'user_id'
+        foreignKey: 'user_id',
+        constraints: false
       });
     }
   }

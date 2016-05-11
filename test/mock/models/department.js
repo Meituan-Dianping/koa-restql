@@ -20,4 +20,13 @@ module.exports.options = {
     fields: ['user_id'],
   }],
 
+  classMethods: {
+    associate: (models) => {
+      models.department.hasOne(models.user, {
+        as: 'master',
+        foreignKey: 'user_id',
+        constraints: false
+      });
+    }
+  }
 };
