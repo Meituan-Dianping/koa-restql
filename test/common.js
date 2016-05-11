@@ -35,9 +35,10 @@ const sequelize = new Sequelize(database, {
 const models = {};
 const associationModels = [];
 
-const loadMockModels = (modelsPath) => {
+const loadMockModels = (modelsPath, schema) => {
 
-  fs.readdirSync(modelsPath).forEach((filename) => {
+  let ret = {}
+  fs.readdirSync(modelsPath).forEach(filename => {
 
     let modelPath      = path.resolve(modelsPath, filename)
       , stats          = fs.lstatSync(modelPath)
@@ -50,25 +51,29 @@ const loadMockModels = (modelsPath) => {
 
     // load model recursively
     if (isDirectory) {
-      models[filename] = loadModels(models, modelPath);
+      let schema = path.relative(__dirname + '/mock/models/', modelPath);
+      models[filename] = loadMockModels(modelPath, schema.replace('/','_'));
       return;
     }       
-    
-    let schema     = require(modelPath)
+
+    let model      = require(modelPath)
       , name       = filename.match(validNameRegex)[1]
-      , options    = schema.options
-      , attributes = schema.attributes(Sequelize)
-      , model      = sequelize.define(name, attributes, options);
+      , options    = model.options || {}
+      , attributes = model.attributes(Sequelize);
+    
+    options.schema = schema;
+    ret[name] = models[name] = sequelize.define(name, attributes, options);
 
-    models[name] = model;
+    if ('associate' in models[name])
+      associationModels.push(models[name]);
 
-    if ('associate' in model)
-      associationModels.push(model);
   });
+
+  return ret;
 }
 
 const loadMockData = () => {
-  let models   = sequelize
+  let models   = sequelize.models
     , promises = [];
 
   return sequelize.sync({
@@ -76,7 +81,7 @@ const loadMockData = () => {
   }).then(() => {
     Object.keys(mock).forEach(key => {
       let data  = mock[key]
-        , model = sequelize.models[key];
+        , model = models[key];
 
       promises.push(Promise.all(data.map(
         row => model.create(row)

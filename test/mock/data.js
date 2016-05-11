@@ -32,5 +32,13 @@ module.exports = {
     { user_id: 2, tag_id: 3, status: 2 },
     { user_id: 2, tag_id: 4, status: 2 },
     { user_id: 2, tag_id: 5, status: 1 }
+  ],
+
+  /**
+   * schema
+   */
+  car: [
+    { name: 'tesla'},
+    { name: 'audi'}
   ]
 }
