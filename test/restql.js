@@ -3,6 +3,7 @@
 const Restql = require('../lib/Restql');
 const common = require('./common');
 
+const qs      = common.qs;
 const koa     = common.koa;
 const util    = common.util;
 const http    = common.http;
@@ -11,8 +12,6 @@ const assert  = common.assert;
 const request = common.request;
 const models  = common.sequelize.models;
 const debug   = common.debug('koa-restql:test:restql');
-
-const qs = require('qs');
 
 describe ('qs', function () {
   debug(decodeURIComponent(qs.stringify({
@@ -586,8 +585,12 @@ describe ('Restql', function () {
 
     it ('should get an user array with query where', function (done) {
       
+      let querystring = qs.stringify({
+        id: 1
+      });
+
       server
-        .get('/user?id=1')
+        .get(`/user?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -601,9 +604,13 @@ describe ('Restql', function () {
     })
 
     it ('should get an user array with query where', function (done) {
+
+      let querystring = qs.stringify({
+        id: [1, 2]
+      });
       
       server
-        .get('/user?id[]=1&id[]=2')
+        .get(`/user?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -616,9 +623,13 @@ describe ('Restql', function () {
     })
 
     it ('should get a tag array with query where', function (done) {
+
+      let querystring = qs.stringify({
+        id: [1, 2]
+      });
       
       server
-        .get('/user/1/tags?id[]=1&id[]=2')
+        .get(`/user/1/tags?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -634,10 +645,14 @@ describe ('Restql', function () {
      * query string attributes
      */
 
-    it ('should get usre array with query attribute', function (done) {
+    it ('should get user array with query attribute', function (done) {
       
+      let querystring = qs.stringify({
+        _attributes: 'id'
+      });
+
       server
-        .get('/user?_attributes=id')
+        .get(`/user?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -654,9 +669,13 @@ describe ('Restql', function () {
     })
 
     it ('should get user array with query attributes', function (done) {
-      
+
+      let querystring = qs.stringify({
+        _attributes: ['id', 'login']
+      });
+
       server
-        .get('/user?_attributes[]=id&_attributes[]=login')
+        .get(`/user?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -674,24 +693,52 @@ describe ('Restql', function () {
 
     it ('should get an user with query attribute', function (done) {
       
+      let querystring = qs.stringify({
+        _attributes: 'id'
+      });
+
       server
-        .get('/user/1?_attributes=id')
+        .get(`/user/1?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
-          assert(typeof body === 'object');
+          assert('object' === typeof body);
           debug(body);
-          debug(!body.login);
-          debug(body.id);
+          assert(!body.login);
+          assert(body.id);
+          done();
+        })
+    })
+
+    it ('should get an user with query attributes', function (done) {
+      
+      let querystring = qs.stringify({
+        _attributes: ['id', 'name']
+      });
+
+      server
+        .get(`/user/1?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert('object' === typeof body);
+          debug(body);
+          assert(!body.login);
+          assert(body.id);
           done();
         })
     })
 
     it ('should get user tag array with query attribute', function (done) {
+
+      let querystring = qs.stringify({
+        _attributes: 'name'
+      });
       
       server
-        .get('/user/1/tags?_attributes=name')
+        .get(`/user/1/tags?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -712,9 +759,15 @@ describe ('Restql', function () {
      */
 
     it ('should get tags array with order', function (done) {
+
+      let querystring = qs.stringify({
+        _order: [
+          'id DESC',
+        ]
+      });
       
       server
-        .get('/tag?_order=id DESC')
+        .get(`/tag?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -729,12 +782,20 @@ describe ('Restql', function () {
 
           done();
         })
+
     })
 
     it ('should get tags array with orders', function (done) {
+
+      let querystring = qs.stringify({
+        _order: [
+          'id DESC',
+          'name DESC'
+        ]
+      });
       
       server
-        .get('/tag?_order[]=id DESC&_order[]=name ASC')
+        .get(`/tag?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -749,12 +810,20 @@ describe ('Restql', function () {
 
           done();
         })
+
     })
 
     it ('should get user tag array with orders', function (done) {
+
+      let querystring = qs.stringify({
+        _order: [
+          ['id', 'DESC'],
+          ['name', 'DESC']
+        ]
+      });
       
       server
-        .get('/user/1/tags?_order[]=id DESC&_order[]=name ASC')
+        .get(`/user/1/tags?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -772,10 +841,20 @@ describe ('Restql', function () {
 
     })
 
-    it.only ('should get user tag array with through', function (done) {
-      
+    it ('should get user tag array with through', function (done) {
+
+      let querystring = qs.stringify({
+        _through: {
+          where: {
+            status: 1
+          }
+        }
+      }, {
+        allowDots: true
+      });
+
       server
-        .get('/user/1/tags?_through.where.status=1')
+        .get(`/user/1/tags?${querystring}`)
         .expect(200)
         .end((err, res) => {
           if (err) return done(err);
@@ -788,7 +867,6 @@ describe ('Restql', function () {
             assert(tag.user_tags);
             assert(tag.user_tags.status === 1);
           })
-
           done();
         })
 

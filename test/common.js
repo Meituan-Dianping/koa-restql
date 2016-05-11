@@ -1,6 +1,7 @@
 'use strict';
 
 const fs        = require('fs');
+const qs        = require('qs');
 const koa       = require('koa');
 const util      = require('util');
 const path      = require('path');
@@ -92,6 +93,7 @@ associationModels.forEach(model => {
 })
 
 module.exports = {
+  qs,
   koa,
   path, 
   util,
