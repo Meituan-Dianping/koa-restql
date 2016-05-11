@@ -872,6 +872,38 @@ describe ('Restql', function () {
 
     })
 
+    it ('should get an user with query include', function (done) {
+
+      let querystring = qs.stringify({
+        _include: {
+          association: 'tags',
+          include: [{
+            association: 'users'
+          }]
+        }
+      });
+
+      server
+        .get(`/user/1?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert('object' === typeof body);
+          debug(body.tags);
+          assert(Array.isArray(body.tags));
+          assert(body.tags.length === 3);
+          body.tags.forEach(tag => {
+            assert(tag.id);
+            assert(tag.name);
+            assert(tag.users);
+            assert(Array.isArray(tag.users));
+            assert(tag.users.length > 0);
+          })
+          done();
+        })
+    })
+
     it ('should get user array with query include', function (done) {
 
       let querystring = qs.stringify({
