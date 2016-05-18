@@ -17,11 +17,6 @@ module.exports.attributes = (DataTypes) => {
 
 module.exports.options = {
 
-  indexes: [{
-    unique: true,
-    fields: ['login']
-  }],
-
   classMethods: {
     associate: (models) => {
       models.user.hasOne(models.profile, {
