@@ -22,7 +22,7 @@
   "devDependencies": {
     "koa": "^1.2.0",
     "mysql": "^2.10.2",
-    "sequelize": "^3.21.0",
+    "sequelize": "^3.23.2",
     "glob": "^7.0.3",
     "mocha": "^2.3.4",
     "supertest": "^1.2.0"

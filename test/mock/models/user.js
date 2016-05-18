@@ -7,8 +7,10 @@ module.exports.attributes = (DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },   
-
-    login : DataTypes.STRING,
+    login : {
+      type: DataTypes.STRING,
+      unique: true
+    }, 
     email : DataTypes.STRING
   };
 }

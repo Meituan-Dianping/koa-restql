@@ -144,6 +144,41 @@ describe ('Restql', function () {
         })
     })
 
+    it ('should return a 409', function (done) {
+      
+      let data = {
+        login : 'dean',
+        email : 'dean@gmail.com'
+      }
+
+      server
+        .post('/user')
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err);
+          server
+            .post('/user')
+            .send(data)
+            .expect(409)
+            .end(done);
+        })
+    })
+
+    it ('user_tags should return a 409', function (done) {
+      
+      let data = {
+        user_id : 1,
+        tag_id  : 1
+      }
+
+      server
+        .post('/user_tags')
+        .send(data)
+        .expect(409)
+        .end(done);
+    })
+
     it ('should delete an user', function (done) {
 
       server

@@ -13,3 +13,11 @@ module.exports.attributes = (DataTypes) => {
     status  : DataTypes.INTEGER
   }
 }
+
+module.exports.options = {
+
+  indexes: [{
+    unique: true,
+    fields: ['user_id', 'tag_id']
+  }]
+}
