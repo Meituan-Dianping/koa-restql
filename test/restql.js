@@ -183,7 +183,7 @@ describe ('Restql', function () {
 
       server
         .delete('/user/1')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -289,7 +289,7 @@ describe ('Restql', function () {
 
       server
         .delete('/user/1/profile')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -399,7 +399,7 @@ describe ('Restql', function () {
 
       server
         .delete('/profile/1/user')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -500,7 +500,7 @@ describe ('Restql', function () {
 
       server
         .delete('/user/1/departments/1')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -596,7 +596,7 @@ describe ('Restql', function () {
 
       server
         .delete('/user/1/tags/1')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
