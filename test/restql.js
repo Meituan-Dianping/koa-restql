@@ -59,7 +59,7 @@ describe ('Restql', function () {
      * without association
      */
 
-    it.only ('should get user array', function (done) {
+    it ('should get user array', function (done) {
       
       server
         .get('/user')
@@ -1188,6 +1188,166 @@ describe ('Restql', function () {
           })
           done();
         })
+    })
+
+    /*
+     * pagination
+     */
+
+    const createMockUsers = (count) => {
+
+      let users = [];
+      for (let i = 0; i < count; i ++) {
+        let name = `user-${i}`;
+        users.push({
+          login : name,
+          email : `${name}@gmail.com`
+        });
+      }
+
+      return models.user.bulkCreate(users); 
+    }
+
+    it ('should get 20 users', function (done) {
+
+      const CREATE_USER_COUNT = 20;
+
+      createMockUsers(CREATE_USER_COUNT).then(users => {
+        server
+          .get(`/user`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 20);
+            done();
+          })
+      })
+    })
+
+    it ('should get 10 users', function (done) {
+
+      const CREATE_USER_COUNT = 20;
+
+      createMockUsers(CREATE_USER_COUNT).then(users => {
+        server
+          .get(`/user?_limit=10`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 10);
+            done();
+          })
+      })
+    })
+
+    it ('should get 10 users from 6', function (done) {
+
+      const CREATE_USER_COUNT = 20;
+
+      createMockUsers(CREATE_USER_COUNT).then(users => {
+        server
+          .get(`/user?_limit=10&&_offset=5`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 10);
+            assert(body[0].id === 6);
+            done();
+          })
+      })
+    })
+
+    const createMockTags = (user, count) => {
+
+      let tags = [];
+      for (let i = 0; i < count; i ++) {
+        let name = `tag-${i}`;
+        tags.push({ name });
+      }
+
+      return models.tag.bulkCreate(tags)
+        .then(tags => {
+          let promises = [];
+          tags.forEach(tag => {
+            let name = tag.name;
+            promises.push(models.tag.find({
+              where: { name }
+            }).then(tag => {
+              return models.user_tags.create({
+                user_id : user.id,
+                tag_id  : tag.id
+              })
+            }))
+          })
+          return Promise.all(promises);
+        })
+    }
+
+    it ('should get 20 user tags', function (done) {
+
+      const CREATE_TAG_COUNT = 20;
+
+      createMockTags({ id: 1 }, CREATE_TAG_COUNT).then(tags => {
+        server
+          .get(`/user/1/tags`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 20);
+            done();
+          })
+      })
+    })
+
+    it ('should get 10 user tags', function (done) {
+
+      const CREATE_TAG_COUNT = 20;
+
+      createMockTags({ id: 1 }, CREATE_TAG_COUNT).then(tags => {
+        server
+          .get(`/user/1/tags?_limit=10`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 10);
+            done();
+          })
+      })
+    })
+
+    it ('should get 10 user tags from 6', function (done) {
+
+      const CREATE_TAG_COUNT = 20;
+
+      createMockTags({ id: 1 }, CREATE_TAG_COUNT).then(tags => {
+        server
+          .get(`/user/1/tags?_limit=10&_offset=5`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 10);
+            assert(body[0].id !== 0);
+            done();
+          })
+      })
     })
   })
 })
