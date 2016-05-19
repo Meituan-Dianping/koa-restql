@@ -1048,14 +1048,80 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should get user array with query include', function (done) {
+    it ('should get an user with profile & tags | object array', function (done) {
+
+      let querystring = qs.stringify({
+        _include: [
+          { association: 'profile' },
+          { association: 'tags' }
+        ]      
+      });
+
+      server
+        .get(`/user/1?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert('object' === typeof body);
+          debug(body);
+          debug(body.tags);
+          debug(body.profile);
+          assert(body.tags)
+          assert(body.profile.id)
+          assert(body.profile.user_id === 1);
+          done();
+        })
+    })
+
+    it ('should get an user with profile & tags | string array', function (done) {
+
+      let querystring = qs.stringify({
+        _include: ['profile', 'tags']      
+      });
+
+      server
+        .get(`/user/1?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert('object' === typeof body);
+          debug(body);
+          debug(body.tags);
+          debug(body.profile);
+          assert(body.tags)
+          assert(body.profile.id)
+          assert(body.profile.user_id === 1);
+          done();
+        })
+    })
+
+    it ('should get an user with profile', function (done) {
+
+      let querystring = qs.stringify({
+        _include: { association: 'profile' }
+      });
+
+      server
+        .get(`/user/1?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert('object' === typeof body);
+          debug(body.profile);
+          assert(body.profile.id)
+          assert(body.profile.user_id === 1);
+          done();
+        })
+    })
+
+    it ('should get user array with tags query include', function (done) {
 
       let querystring = qs.stringify({
         _include: {
-          association: 'tags',
-          include: [{
-            association: 'users'
-          }]
+          association: 'tags'
         }
       });
 
