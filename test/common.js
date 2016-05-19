@@ -30,6 +30,7 @@ const sequelize = new Sequelize(database, {
     updatedAt       : 'updated_at',
     deletedAt       : 'deleted_at',
   },
+  logging: debug('sequelize')
 });
 
 const models = {};

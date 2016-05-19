@@ -144,11 +144,155 @@ describe ('Restql', function () {
         })
     })
 
+    it ('should return a 409 when create an user', function (done) {
+      
+      let data = {
+        login : 'dean',
+        email : 'dean@gmail.com'
+      }
+
+      server
+        .post('/user')
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err);
+          server
+            .post('/user')
+            .send(data)
+            .expect(409)
+            .end(done);
+        })
+    })
+
+    it ('should create an user without 409', function (done) {
+        
+      models.user.findAll().then(users => {
+
+        assert(users);
+
+        let data = users[0];
+
+        assert(data);
+
+        server
+          .delete(`/user/${data.id}`)
+          .expect(204)
+          .end((err, res) => {
+            server
+              .post('/user')
+              .send(data.dataValues)
+              .expect(201)
+              .end((err, res) => {
+                if (err) return done(err);
+
+                let body = res.body;
+                debug(body);
+                assert(body.login === data.login);
+                assert(body.email === data.email);
+
+                models.user.findById(body.id).then(user => {
+                  assert(user.login === body.login);
+                  assert(user.email === body.email);
+                  done();
+                }).catch (done);
+              })
+          })
+      })
+    })
+
+    it ('should return a 409 when create user_tag', function (done) {
+      
+      let data = {
+        user_id : 1,
+        tag_id  : 1
+      }
+
+      server
+        .post('/user_tags')
+        .send(data)
+        .expect(409)
+        .end(done);
+    })
+
+    it ('should create a user_tag without 409', function (done) {
+
+      models.user_tags.findAll().then(userTags => {
+
+        assert(userTags);
+
+        let data = userTags[0];
+
+        assert(data);
+
+        server
+          .delete(`/user_tags/${data.id}`)
+          .expect(204)
+          .end((err, res) => {
+            server
+              .post('/user_tags')
+              .send(data.dataValues)
+              .expect(201)
+              .end((err, res) => {
+                if (err) return done(err);
+
+                let body = res.body;
+                debug(body);
+                assert(body.user_id === data.user_id);
+                assert(body.tag_id === data.tag_id);
+
+                models.user_tags.findById(body.id).then(userTag => {
+                  assert(userTag.user_id === body.user_id);
+                  assert(userTag.tag_id === body.tag_id);
+                  done();
+                }).catch (done);
+              })
+          })
+      })
+    })
+
+    it ('should create a user profile without 409', function (done) {
+
+      models.profile.findAll().then(profiles => {
+
+        assert(profiles);
+
+        let data = profiles[0];
+
+        assert(data);
+
+        server
+          .delete(`/profile/${data.id}`)
+          .expect(204)
+          .end((err, res) => {
+            server
+              .put(`/user/${data.user_id}/profile`)
+              .send(data.dataValues)
+              .expect(200)
+              .end((err, res) => {
+                if (err) return done(err);
+
+                let body = res.body;
+                debug(body);
+                assert(body.user_id === data.user_id);
+                assert(body.description === data.description);
+
+                models.profile.findById(body.id).then(profile => {
+                assert(profile.user_id === body.user_id);
+                assert(profile.description === body.description);
+                  done();
+                }).catch (done);
+              })
+          })
+
+      })
+    })
+
     it ('should delete an user', function (done) {
 
       server
         .delete('/user/1')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -254,7 +398,7 @@ describe ('Restql', function () {
 
       server
         .delete('/user/1/profile')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -364,7 +508,7 @@ describe ('Restql', function () {
 
       server
         .delete('/profile/1/user')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -465,7 +609,7 @@ describe ('Restql', function () {
 
       server
         .delete('/user/1/departments/1')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;
@@ -561,7 +705,7 @@ describe ('Restql', function () {
 
       server
         .delete('/user/1/tags/1')
-        .expect(200)
+        .expect(204)
         .end((err, res) => {
           if (err) return done(err);
           let body = res.body;

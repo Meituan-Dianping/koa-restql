@@ -5,20 +5,18 @@ module.exports.attributes = (DataTypes) => {
     id : {
       type: DataTypes.INTEGER,
       autoIncrement: true,
-      primaryKey: true,
+      primaryKey: true
     },   
 
-    user_id     : DataTypes.INTEGER,
+    user_id: {
+      type: DataTypes.INTEGER,
+      unique: true
+    },
     description : DataTypes.STRING,
   };
 }
 
 module.exports.options = {
-
-  indexes: [{
-    unique: true,
-    fields: ['user_id'],
-  }],
 
   classMethods: {
     associate: (models) => {
