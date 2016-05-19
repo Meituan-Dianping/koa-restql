@@ -59,7 +59,7 @@ describe ('Restql', function () {
      * without association
      */
 
-    it ('should get user array', function (done) {
+    it.only ('should get user array', function (done) {
       
       server
         .get('/user')
@@ -1115,6 +1115,31 @@ describe ('Restql', function () {
           assert(body.profile.user_id === 1);
           done();
         })
+    })
+
+    it ('should get user tags array with users', function (done) {
+
+      let querystring = qs.stringify({
+        _include: {
+          association: 'users'
+        }
+      });
+
+      server
+        .get(`/user/1/tags?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          body.forEach(tag => {
+            assert(tag.users);
+            assert(Array.isArray(tag.users));
+          })
+          done();
+        })
+
     })
 
     it ('should get user array with tags query include', function (done) {
