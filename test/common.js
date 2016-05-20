@@ -28,7 +28,7 @@ const sequelize = new Sequelize(database, {
     schemaDelimiter : '_',
     createdAt       : 'created_at',
     updatedAt       : 'updated_at',
-    deletedAt       : 'deleted_at',
+    deletedAt       : 'deleted_at'
   },
   logging: debug('sequelize')
 });
