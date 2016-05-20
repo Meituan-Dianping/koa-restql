@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports.attributes = (DataTypes) => {
+
   return {
     id : {
       type: DataTypes.INTEGER,
@@ -11,7 +12,17 @@ module.exports.attributes = (DataTypes) => {
       type: DataTypes.STRING,
       unique: true
     }, 
-    email : DataTypes.STRING
+    email : DataTypes.STRING,
+    deleted_at : {
+      type: DataTypes.DATE,
+      allowNull: false,
+      /**
+       * if this type is DATE,
+       * defaultValue must be a Date, 
+       * otherwise paranoid is useless
+       */
+      defaultValue: new Date(0)
+    }
   };
 }
 
