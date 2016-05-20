@@ -1,7 +1,7 @@
 'use strict'
 
 const Restql = require('../lib/Restql');
-const common = require('./common');
+const common = require('./lib/common');
 
 const qs      = common.qs;
 const koa     = common.koa;

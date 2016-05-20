@@ -1,7 +1,7 @@
 'use strict';
 
 const mock   = require('./mock/data');
-const common = require('./common');
+const common = require('./lib/common');
 const debug  = common.debug('koa-restql:test:setup');
 
 before ('db setup', function (done) {
