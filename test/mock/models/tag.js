@@ -8,17 +8,15 @@ module.exports.attributes = (DataTypes) => {
       primaryKey: true,
     },   
 
-    name : DataTypes.STRING
+    name : {
+      type: DataTypes.STRING,
+      unique: true
+    }  
   }
 }
 
 module.exports.options = {
   
-  indexes: [{
-    unique: true,
-    fields: ['name']
-  }],
-
   classMethods: {
     associate: (models) => {
       models.tag.belongsToMany(models.user, {
