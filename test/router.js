@@ -2,7 +2,7 @@
 
 const router = require('../lib/router');
 const common = require('../lib/common');
-const test   = require('./common');
+const test   = require('./lib/common');
 
 const assert  = test.assert;
 const Router  = test.Router;

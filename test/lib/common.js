@@ -12,8 +12,8 @@ const request   = require('supertest');
 const Sequelize = require('sequelize');
 const Router    = require('koa-router');
 
-const mock      = require('./mock/data');
-const methods   = require('../lib/methods');
+const mock      = require('../mock/data');
+const methods   = require('../../lib/methods');
 
 const database  = process.env.TEST_DB || "mysql://koa-restql-test:test@localhost/koa-restql-test#UT8";
 
@@ -52,7 +52,12 @@ const loadMockModels = (modelsPath, schema) => {
 
     // load model recursively
     if (isDirectory) {
-      let schema = path.relative(__dirname + '/mock/models/', modelPath);
+      let schema = path.relative(__dirname + '../mock/models/', modelPath);
+      schema = schema.match(/(\w+)$/);
+      if (!schema)
+        return;
+
+      [ schema ] = schema;
       models[filename] = loadMockModels(modelPath, schema.replace('/','_'));
       return;
     }       

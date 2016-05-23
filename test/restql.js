@@ -1,7 +1,7 @@
 'use strict'
 
 const Restql = require('../lib/Restql');
-const common = require('./common');
+const common = require('./lib/common');
 
 const qs      = common.qs;
 const koa     = common.koa;
@@ -194,6 +194,60 @@ describe ('Restql', function () {
                 models.user.findById(body.id).then(user => {
                   assert(user.login === body.login);
                   assert(user.email === body.email);
+                  done();
+                }).catch (done);
+              })
+          })
+      })
+    })
+
+    it ('should return a 409 when create an tag', function (done) {
+      
+      let data = {
+        name: '409'
+      }
+
+      server
+        .post('/tag')
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err);
+          server
+            .post('/tag')
+            .send(data)
+            .expect(409)
+            .end(done);
+        })
+    })
+
+    it ('should create an tag without 409', function (done) {
+        
+      models.tag.findAll().then(tags => {
+
+        assert(tags);
+
+        let data = tags[0];
+
+        assert(data);
+
+        server
+          .delete(`/tag/${data.id}`)
+          .expect(204)
+          .end((err, res) => {
+            server
+              .post('/tag')
+              .send(data.dataValues)
+              .expect(201)
+              .end((err, res) => {
+                if (err) return done(err);
+
+                let body = res.body;
+                debug(body);
+                assert(body.name === data.name);
+
+                models.tag.findById(body.id).then(tag => {
+                  assert(tag.name === body.name);
                   done();
                 }).catch (done);
               })
