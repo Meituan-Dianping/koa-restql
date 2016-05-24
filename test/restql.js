@@ -262,8 +262,6 @@ describe ('Restql', function () {
         tag_id  : 1
       }
 
-      debug(models.user_tags.options)
-
       server
         .post('/user_tags')
         .send(data)
