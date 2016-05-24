@@ -262,6 +262,8 @@ describe ('Restql', function () {
         tag_id  : 1
       }
 
+      debug(models.user_tags.options)
+
       server
         .post('/user_tags')
         .send(data)
@@ -865,6 +867,83 @@ describe ('Restql', function () {
           done();
         })
     })
+
+    it ('should get user array with query attribute include', function (done) {
+      
+      let querystring = qs.stringify({
+        _attributes: {
+          include: ['id']
+        }
+      });
+
+      server
+        .get(`/user?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 2);
+          body.forEach(user => {
+            assert(!user.login);
+            assert(user.id);
+          })
+          done();
+        })
+    })
+
+    it ('should get user array with query attribute exclude', function (done) {
+      
+      let querystring = qs.stringify({
+        _attributes: {
+          exclude: ['id']
+        }
+      });
+
+      server
+        .get(`/user?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 2);
+          body.forEach(user => {
+            assert(user.login);
+            assert(!user.id);
+          })
+          done();
+        })
+    })
+
+    it ('should get user array with query attribute exclude st stringring', function (done) {
+      
+      let querystring = qs.stringify({
+        _attributes: {
+          exclude: 'id'
+        }
+      });
+
+      server
+        .get(`/user?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 2);
+          body.forEach(user => {
+            assert(user.login);
+            assert(user.email);
+            assert(!user.id);
+          })
+          done();
+        })
+    })
+
 
     it ('should get user array with query attributes', function (done) {
 

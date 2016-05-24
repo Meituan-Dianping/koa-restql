@@ -85,7 +85,7 @@ const loadMockData = () => {
   return sequelize.sync({
     force: true
   }).then(() => {
-    Object.keys(mock).forEach(key => {
+    Object.keys(models).forEach(key => {
       let data  = mock[key]
         , model = models[key];
 
