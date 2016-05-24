@@ -916,7 +916,7 @@ describe ('Restql', function () {
         })
     })
 
-    it ('should get user array with query attribute exclude st stringring', function (done) {
+    it ('should get user array with query attribute exclude string', function (done) {
       
       let querystring = qs.stringify({
         _attributes: {
