@@ -1341,6 +1341,7 @@ describe ('Restql', function () {
         server
           .get(`/user?_limit=10`)
           .expect(200)
+          .expect('X-Range', '0 10 22')
           .end((err, res) => {
             if (err) return done(err);
             let body = res.body;
@@ -1360,10 +1361,11 @@ describe ('Restql', function () {
         server
           .get(`/user?_limit=10&&_offset=5`)
           .expect(200)
+          .expect('X-Range', '5 15 22')
           .end((err, res) => {
             if (err) return done(err);
             let body = res.body;
-            debug(body);
+            debug(res.header);
             assert(Array.isArray(body));
             assert(body.length === 10);
             assert(body[0].id === 6);
@@ -1406,9 +1408,11 @@ describe ('Restql', function () {
         server
           .get(`/user/1/tags`)
           .expect(200)
+          .expect('X-Range', '0 20 23')
           .end((err, res) => {
             if (err) return done(err);
             let body = res.body;
+            debug(res.header);
             debug(body);
             assert(Array.isArray(body));
             assert(body.length === 20);
@@ -1425,6 +1429,7 @@ describe ('Restql', function () {
         server
           .get(`/user/1/tags?_limit=10`)
           .expect(200)
+          .expect('X-Range', '0 10 23')
           .end((err, res) => {
             if (err) return done(err);
             let body = res.body;
@@ -1447,6 +1452,7 @@ describe ('Restql', function () {
           .end((err, res) => {
             if (err) return done(err);
             let body = res.body;
+            debug(res);
             debug(body);
             assert(Array.isArray(body));
             assert(body.length === 10);
