@@ -1365,6 +1365,7 @@ describe ('Restql', function () {
           .end((err, res) => {
             if (err) return done(err);
             let body = res.body;
+            debug(body);
             assert(Array.isArray(body));
             assert(body.length === 10);
             assert(body[0].id === 6);
