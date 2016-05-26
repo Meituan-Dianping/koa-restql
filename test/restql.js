@@ -74,6 +74,30 @@ describe ('Restql', function () {
         })
     })
 
+    it ('should get user array', function (done) {
+
+      let querystring = {
+        id: {
+          $gt: 1
+        }
+      }
+      
+      server
+        .get(`/user?${qs.stringify(querystring)}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(Array.isArray(body));
+          debug(body);
+          assert(body.length === 1);
+          body.forEach(user => {
+            assert(user.id > 1);
+          })
+          done();
+        })
+    })
+
     it ('should get an user', function (done) {
       
       server
