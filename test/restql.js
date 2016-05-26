@@ -342,6 +342,57 @@ describe ('Restql', function () {
       })
     })
 
+    it ('should create an user with profile and tags', function (done) {
+      
+      let data = {
+        login : 'dean',
+        email : 'dean@gmail.com',
+        profile : {
+          description: 'I am a ghost hunter'
+        },
+        tags  : [
+          { name: 'ghost hunter' },
+          { name: 'brave' }
+        ]
+      }
+
+      let querystring = {
+        _include: ['profile', 'tags']
+      }
+
+      server
+        .post(`/user?${qs.stringify(querystring)}`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(typeof body === 'object');
+          debug(body);
+          assert(body.login === data.login);
+          assert(body.email === data.email);
+
+          models.user.findById(body.id, {
+            include: [
+              { association: models.user.associations.profile },
+              { association: models.user.associations.tags }
+            ] 
+          }).then(user => {
+              assert(user.login === body.login);
+              assert(user.email === body.email);
+              let profile = user.profile
+                , tags    = user.tags;
+              assert(profile.description === data.profile.description);
+              assert(tags.length === data.tags.length);
+              data.tags.forEach(tag => {
+                let name = tag.name;
+                assert(tags.find(tag => tag.name === name));
+              })
+              done();
+            }).catch (done);
+        })
+    })
+
     it ('should delete an user', function (done) {
 
       server
