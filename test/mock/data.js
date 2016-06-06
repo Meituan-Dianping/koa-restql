@@ -11,6 +11,11 @@ module.exports = {
     { user_id: 2, description: 'I am mm' }
   ],
 
+  privacy: [
+    { user_id: 1, secret: 'I am a unicorn' },
+    { user_id: 2, secret: 'I am a alien' }
+  ],
+
   department: [
     { user_id: 1, description: 'Spacious, Bright, Ceiling window' },
     { user_id: 1, description: 'Double, Swimming pool, Garage' },

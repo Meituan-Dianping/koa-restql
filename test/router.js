@@ -65,8 +65,10 @@ const checkModelRoutes = (router, path, models, model, association) => {
       , isSingular  = !! association.isSingleAssociation
       , pathName    = paths[1].name.slice();
     
-    pathName += `/${common.getAssociationName(association)}`;
-    checkModelRoutes(router, { name: pathName, isSingular }, models, model, association);
+    if (!association.options.restql || !association.options.restql.ignore) {
+      pathName += `/${common.getAssociationName(association)}`;
+      checkModelRoutes(router, { name: pathName, isSingular }, models, model, association);
+    }
   })
 }
 

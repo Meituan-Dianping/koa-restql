@@ -26,7 +26,7 @@ describe ('qs', function () {
 describe ('Restql', function () {
   it ('should create new Restql', function (done) {
    
-    let restql = new Restql(common.sequelize.models);
+    let restql = new Restql(models);
 
     assert(restql instanceof Restql);
     done();
@@ -1532,6 +1532,190 @@ describe ('Restql', function () {
             assert(body.length === 10);
             assert(body[0].id !== 0);
             done();
+          })
+      })
+    })
+
+
+    /*
+     * association control
+     */
+
+    describe ('association control', function (done) {
+
+      const setupServer = (models) => {
+        let app = koa();
+        let restql = new Restql(models);
+
+        app.use(restql.routes());
+        let server = request(http.createServer(app.callback()));
+
+        return server;
+      }
+
+      it ('should return 404 not found', function (done) {
+
+        models.user.hasOne(models.privacy, {
+          as: 'privacy',
+          foreignKey: 'user_id',
+          constraints: false,
+          restql: {
+            ignore: true
+          }
+        })
+
+        let server = setupServer(models);
+
+        server
+          .get(`/user/1/privacy`)
+          .expect(404)
+          .end((err, res) => {
+            if (err) return done(err);
+            done();
+          })
+      })
+
+      it ('should return 403 when post departments', function (done) {
+
+        models.user.hasMany(models.department, {
+          as: 'departments',
+          foreignKey: 'user_id',
+          constraints: false,
+          restql: {
+            readOnly: true
+          }
+        })
+
+        let server = setupServer(models);
+
+        let data = {
+          description: 'I am hacked'
+        };
+
+        server
+        .get('/user/1/departments')
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          debug(body);
+          assert(Array.isArray(body));
+          assert(body.length === 2);
+          server
+            .post(`/user/1/departments`)
+            .send(data)
+            .expect(403)
+            .end((err, res) => {
+              if (err) return done(err);
+              done();
+            })
+        })
+      })
+
+      it ('should return 403 when put privacy', function (done) {
+
+        models.user.hasOne(models.privacy, {
+          as: 'privacy',
+          foreignKey: 'user_id',
+          constraints: false,
+          restql: {
+            readOnly: true
+          }
+        })
+
+        let server = setupServer(models);
+
+        let data = {
+          secret: 'I am hacked'
+        };
+
+        server
+          .get(`/user/1/privacy`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(typeof body === 'object');
+            assert(body.secret);
+            server
+              .put(`/user/1/privacy`)
+              .send(data)
+              .expect(403)
+              .end((err, res) => {
+                if (err) return done(err);
+                done();
+              })
+          })
+      })
+
+      it ('should return 403 when get privacy', function (done) {
+
+        models.user.hasOne(models.privacy, {
+          as: 'privacy',
+          foreignKey: 'user_id',
+          constraints: false,
+          restql: {
+            writeOnly: true
+          }
+        })
+
+        let server = setupServer(models);
+
+        let data = {
+          secret: 'I am hacked'
+        };
+
+        server
+          .put(`/user/1/privacy`)
+          .send(data)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(typeof body === 'object');
+            assert(body.secret);
+            assert(body.secret === data.secret);
+            server
+              .get(`/user/1/privacy`)
+              .expect(403)
+              .end((err, res) => {
+                if (err) return done(err);
+                done();
+              })
+          })
+      })
+
+      it ('should return 403 when delete privacy', function (done) {
+
+        models.user.hasOne(models.privacy, {
+          as: 'privacy',
+          foreignKey: 'user_id',
+          constraints: false,
+          restql: {
+            readOnly: true
+          }
+        })
+
+        let server = setupServer(models);
+
+        server
+          .get(`/user/1/privacy`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(typeof body === 'object');
+            assert(body.secret);
+            server
+              .del(`/user/1/privacy`)
+              .expect(403)
+              .end((err, res) => {
+                if (err) return done(err);
+                done();
+              })
           })
       })
     })
