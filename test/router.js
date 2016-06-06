@@ -139,6 +139,17 @@ describe('loadRouter (models -> router)', function () {
       }));
     })  
 
+    it ('should return true', function () {
+      assert(methodShouldMount({
+        isSingular: false
+      }, {
+        name: 'get',
+        isSingular: false
+      }, {
+        ignore: false
+      }));
+    })  
+
     it ('should pass all assertions', function () {
       let options = {
         ignore: ['get', 'post']
