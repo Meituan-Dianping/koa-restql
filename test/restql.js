@@ -691,6 +691,7 @@ describe ('Restql', function () {
           assert(body.description === data.description);
 
           models.department.findById(body.id).then(department => {
+            assert(body.user_id);
             assert(body.description === department.description);
             done();
           }).catch (done);
