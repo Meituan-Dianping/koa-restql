@@ -30,6 +30,7 @@ module.exports.options = {
 
   classMethods: {
     associate: (models) => {
+
       models.user.hasOne(models.profile, {
         as: 'profile',
         foreignKey: 'user_id',
