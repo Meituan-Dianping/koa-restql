@@ -36,7 +36,7 @@ const checkRoute = (router, path, method) => {
   return false;
 }
 
-const checkModelRoutes = (router, path, models, model, association) => {
+const checkModelRoutes = (router, path, models, model, association, options) => {
   
   let paths = [ path ];
 
@@ -48,7 +48,7 @@ const checkModelRoutes = (router, path, models, model, association) => {
   paths.forEach(path => {
     methods.forEach(method => {
       let pathName = path.name.slice().replace(/(\:id|\:associationId)/, 1);      
-      if (methodShouldMount(path, method)) {
+      if (methodShouldMount(path, method, options)) {
         assert(checkRoute(router, pathName, method.name));
       } else {
         assert(!checkRoute(router, pathName, method.name));
@@ -66,42 +66,114 @@ const checkModelRoutes = (router, path, models, model, association) => {
       , pathName    = paths[1].name.slice();
     
     pathName += `/${common.getAssociationName(association)}`;
-    checkModelRoutes(router, { name: pathName, isSingular }, models, model, association);
+    checkModelRoutes(router, { name: pathName, isSingular }, models, model, association, association.options.restql);
   })
 }
 
-describe ('loadRouter (models -> router)', function () {
+describe('loadRouter (models -> router)', function () {
   describe ('methodShouldMount (path, method) -> boolean', function () {
     it ('should return true', function () {
-      assert(methodShouldMount({ isSingular: true }, {}));
+      assert(methodShouldMount({
+        isSingular: true
+      }, {}));
     })  
 
     it ('should return true', function () {
-      assert(methodShouldMount({ isSingular: true }, {}));
+      assert(methodShouldMount({
+        isSingular: true
+      }, {}));
     })  
 
     it ('should return true', function () {
-      assert(methodShouldMount({ isSingular: true }, { isSingular: true }));
+      assert(methodShouldMount({
+        isSingular: true
+      }, {
+        isSingular: true
+      }));
     })  
 
     it ('should return true', function () {
-      assert(methodShouldMount({ isSingular: false }, { isSingular: false }));
+      assert(methodShouldMount({
+        isSingular: false
+      }, {
+        isSingular: false
+      }));
     })  
 
     it ('should return false', function () {
-      assert(!methodShouldMount({ isSingular: true }, { isSingular: false }));
+      assert(!methodShouldMount({
+        isSingular: true
+      }, {
+        isSingular: false
+      }));
     })  
 
     it ('should return false', function () {
-      assert(!methodShouldMount({ isSingular: false }, { isSingular: true }));
+      assert(!methodShouldMount({
+        isSingular: false
+      }, {
+        isSingular: true
+      }));
     })  
 
     it ('should return false', function () {
-      assert(!methodShouldMount({ }, { isSingular: false }));
+      assert(!methodShouldMount({}, {
+        isSingular: false
+      }));
     })  
 
     it ('should return false', function () {
-      assert(!methodShouldMount({ }, { isSingular: true }));
+      assert(!methodShouldMount({}, {
+        isSingular: true
+      }));
+    })  
+
+    it ('should return false', function () {
+      assert(!methodShouldMount({
+        isSingular: false
+      }, {
+        name: 'get',
+        isSingular: false
+      }, {
+        ignore: true
+      }));
+    })  
+
+    it ('should return true', function () {
+      assert(methodShouldMount({
+        isSingular: false
+      }, {
+        name: 'get',
+        isSingular: false
+      }, {
+        ignore: false
+      }));
+    })  
+
+    it ('should pass all assertions', function () {
+      let options = {
+        ignore: ['get', 'post']
+      };
+
+      let method = {
+        isSingular: false
+      };
+
+      let path = {  
+        isSingular: false
+      };
+
+      method.name = 'get';
+      assert(!methodShouldMount(path, method, options));
+
+      method.name = 'post';
+      assert(!methodShouldMount(path, method, options));
+
+      method.name = 'put';
+      assert(methodShouldMount(path, method, options));
+
+      method.name = 'del';
+      assert(methodShouldMount(path, method, options));
     })  
   })
 

@@ -89,11 +89,10 @@ const loadMockData = () => {
       let data  = mock[key]
         , model = models[key];
 
-      promises.push(Promise.all(data.map(
-        row => model.create(row)
-      )));
+      if (data) {
+        promises.push(Promise.all(data.map( row => model.create(row)) ));
+      }
     })
-
     return Promise.all(promises);
   })
 }
