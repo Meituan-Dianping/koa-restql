@@ -11,7 +11,7 @@ const Router  = common.Router;
 const assert  = common.assert;
 const request = common.request;
 const models  = common.sequelize.models;
-const debug   = common.debug('koa-restql:test:middlewares');
+const debug   = common.debug('koa-restql:test:associations');
 
 describe ('association ignore', function () {
 
@@ -119,6 +119,26 @@ describe ('association ignore', function () {
       })
 
     })
+
+    it ('should return a user without departments', function (done) {
+
+      let querystring = qs.stringify({
+        _include: {
+          association: 'departments'
+        }
+      });
+
+      server
+        .get(`/user/1?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          debug(body);
+          assert(!body.departments);
+          done();
+        });
+    })
   })
 
   describe ('ignore is array', function () {
@@ -172,7 +192,7 @@ describe ('association ignore', function () {
 
     })
 
-    it ('should return 201 not found when put', function (done) {
+    it ('should return 200 not found when put', function (done) {
       
       models.department.findAll({
         where: {
