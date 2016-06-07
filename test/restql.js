@@ -346,7 +346,7 @@ describe ('Restql', function () {
             server
               .put(`/user/${data.user_id}/profile`)
               .send(data.dataValues)
-              .expect(200)
+              .expect(201)
               .end((err, res) => {
                 if (err) return done(err);
 
@@ -507,7 +507,7 @@ describe ('Restql', function () {
             server
               .put(`/user/${user.id}/profile`)
               .send(data)
-              .expect(200)
+              .expect(201)
               .end((err, res) => {
                 if (err) return done(err);
                 let body = res.body;
@@ -611,7 +611,7 @@ describe ('Restql', function () {
           server
             .put(`/profile/${profile.id}/user`)
             .send(data)
-            .expect(200)
+            .expect(201)
             .end((err, res) => {
               if (err) return done(err);
               let body = res.body;
