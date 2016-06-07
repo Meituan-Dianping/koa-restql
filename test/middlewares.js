@@ -18,17 +18,13 @@ describe ('middlewares', function () {
 
   before (function () {
     let app = koa();
-
     models.user.hasMany(models.department, {
       as: 'departments',
       foreignKey: 'user_id',
-      constraints: false,
-      restql: {
-        ignore: false
-      }
-    })
+      constraints: false
+    });
 
-    let restql = new Restql(common.sequelize.models)
+    let restql = new Restql(models);
 
     app.use(restql.routes());
     server = request(http.createServer(app.callback()));
@@ -51,7 +47,7 @@ describe ('middlewares', function () {
    */
 
   it ('should get user array', function (done) {
-    
+
     server
       .get('/user')
       .expect(200)
@@ -72,7 +68,7 @@ describe ('middlewares', function () {
         $gt: 1
       }
     }
-    
+
     server
       .get(`/user?${qs.stringify(querystring)}`)
       .expect(200)
@@ -90,7 +86,7 @@ describe ('middlewares', function () {
   })
 
   it ('should get an user', function (done) {
-    
+
     server
       .get('/user/1')
       .expect(200)
@@ -105,7 +101,7 @@ describe ('middlewares', function () {
   })
 
   it ('should update an user', function (done) {
-    
+
     let data = {
       login : 'sam',
       email : 'sam@gmail.com'
@@ -123,7 +119,7 @@ describe ('middlewares', function () {
         assert(body.id === 1);
         assert(body.login === data.login);
         assert(body.email === data.email);
-        
+
         models.user.findById(1).then(user => {
           assert(user.login === body.login);
           assert(user.email === body.email);
@@ -133,7 +129,7 @@ describe ('middlewares', function () {
   })
 
   it ('should create an user', function (done) {
-    
+
     let data = {
       login : 'dean',
       email : 'dean@gmail.com'
@@ -160,7 +156,7 @@ describe ('middlewares', function () {
   })
 
   it ('should return a 409 when create an user', function (done) {
-    
+
     let data = {
       login : 'dean',
       email : 'dean@gmail.com'
@@ -181,7 +177,7 @@ describe ('middlewares', function () {
   })
 
   it ('should create an user without 409', function (done) {
-      
+
     models.user.findAll().then(users => {
 
       assert(users);
@@ -217,7 +213,7 @@ describe ('middlewares', function () {
   })
 
   it ('should return a 409 when create an tag', function (done) {
-    
+
     let data = {
       name: '409'
     }
@@ -237,7 +233,7 @@ describe ('middlewares', function () {
   })
 
   it ('should create an tag without 409', function (done) {
-      
+
     models.tag.findAll().then(tags => {
 
       assert(tags);
@@ -271,7 +267,7 @@ describe ('middlewares', function () {
   })
 
   it ('should return a 409 when create user_tag', function (done) {
-    
+
     let data = {
       user_id : 1,
       tag_id  : 1
@@ -337,7 +333,7 @@ describe ('middlewares', function () {
           server
             .put(`/user/${data.user_id}/profile`)
             .send(data.dataValues)
-            .expect(200)
+            .expect(201)
             .end((err, res) => {
               if (err) return done(err);
 
@@ -347,8 +343,8 @@ describe ('middlewares', function () {
               assert(body.description === data.description);
 
               models.profile.findById(body.id).then(profile => {
-              assert(profile.user_id === body.user_id);
-              assert(profile.description === body.description);
+                assert(profile.user_id === body.user_id);
+                assert(profile.description === body.description);
                 done();
               }).catch (done);
             })
@@ -358,7 +354,7 @@ describe ('middlewares', function () {
   })
 
   it ('should create an user with profile and tags', function (done) {
-    
+
     let data = {
       login : 'dean',
       email : 'dean@gmail.com',
@@ -366,8 +362,8 @@ describe ('middlewares', function () {
         description: 'I am a ghost hunter'
       },
       tags  : [
-        { name: 'ghost hunter' },
-        { name: 'brave' }
+      { name: 'ghost hunter' },
+      { name: 'brave' }
       ]
     }
 
@@ -389,22 +385,22 @@ describe ('middlewares', function () {
 
         models.user.findById(body.id, {
           include: [
-            { association: models.user.associations.profile },
-            { association: models.user.associations.tags }
+          { association: models.user.associations.profile },
+          { association: models.user.associations.tags }
           ] 
         }).then(user => {
-            assert(user.login === body.login);
-            assert(user.email === body.email);
-            let profile = user.profile
-              , tags    = user.tags;
-            assert(profile.description === data.profile.description);
-            assert(tags.length === data.tags.length);
-            data.tags.forEach(tag => {
-              let name = tag.name;
-              assert(tags.find(tag => tag.name === name));
-            })
-            done();
-          }).catch (done);
+          assert(user.login === body.login);
+          assert(user.email === body.email);
+          let profile = user.profile
+            , tags    = user.tags;
+          assert(profile.description === data.profile.description);
+          assert(tags.length === data.tags.length);
+          data.tags.forEach(tag => {
+            let name = tag.name;
+            assert(tags.find(tag => tag.name === name));
+          })
+          done();
+        }).catch (done);
       })
   })
 
@@ -429,7 +425,7 @@ describe ('middlewares', function () {
   /*
    * hasOne association
    */
-  
+
   it ('should get user profile', function (done) {
 
     server
@@ -450,7 +446,7 @@ describe ('middlewares', function () {
     let data = {
       description: 'I am updated'
     }
-    
+
     server
       .put('/user/1/profile')
       .send(data)
@@ -470,7 +466,7 @@ describe ('middlewares', function () {
   })
 
   it ('should create user profile', function (done) {
-    
+
     let data = {
       description: 'I am updated'
     }
@@ -498,7 +494,7 @@ describe ('middlewares', function () {
           server
             .put(`/user/${user.id}/profile`)
             .send(data)
-            .expect(200)
+            .expect(201)
             .end((err, res) => {
               if (err) return done(err);
               let body = res.body;
@@ -530,7 +526,7 @@ describe ('middlewares', function () {
           }
         }).then(profile => {
           assert(!profile)
-          done();
+            done();
         }).catch(done);
       })
   })
@@ -579,7 +575,7 @@ describe ('middlewares', function () {
   })
 
   it ('should create profile user', function (done) {
-    
+
     let profile = {
       description: 'I am new'
     }
@@ -602,7 +598,7 @@ describe ('middlewares', function () {
         server
           .put(`/profile/${profile.id}/user`)
           .send(data)
-          .expect(200)
+          .expect(201)
           .end((err, res) => {
             if (err) return done(err);
             let body = res.body;
@@ -621,7 +617,7 @@ describe ('middlewares', function () {
               }) 
             }).catch(done);
           })
-        })
+      })
   })
 
   it ('should delete profile user', function (done) {
@@ -669,7 +665,7 @@ describe ('middlewares', function () {
     let data = {
       description : 'Seaview, Beach Patio, Dog'
     }
-    
+
     server
       .post('/user/1/departments')
       .send(data)
@@ -690,7 +686,7 @@ describe ('middlewares', function () {
   })
 
   it ('should get an user department', function (done) {
-    
+
     server
       .get('/user/1/departments/1')
       .expect(200)
@@ -766,7 +762,7 @@ describe ('middlewares', function () {
     let data = {
       name : 'MIT'
     }
-    
+
     server
       .post('/user/1/tags')
       .send(data)
@@ -786,7 +782,7 @@ describe ('middlewares', function () {
   })
 
   it ('should get an user tag', function (done) {
-    
+
     server
       .get('/user/1/tags/1')
       .expect(200)
@@ -849,7 +845,7 @@ describe ('middlewares', function () {
    */
 
   it ('should get an user array with query where', function (done) {
-    
+
     let querystring = qs.stringify({
       id: 1
     });
@@ -873,7 +869,7 @@ describe ('middlewares', function () {
     let querystring = qs.stringify({
       id: [1, 2]
     });
-    
+
     server
       .get(`/user?${querystring}`)
       .expect(200)
@@ -892,7 +888,7 @@ describe ('middlewares', function () {
     let querystring = qs.stringify({
       id: [1, 2]
     });
-    
+
     server
       .get(`/user/1/tags?${querystring}`)
       .expect(200)
@@ -911,7 +907,7 @@ describe ('middlewares', function () {
    */
 
   it ('should get user array with query attribute', function (done) {
-    
+
     let querystring = qs.stringify({
       _attributes: 'id'
     });
@@ -934,7 +930,7 @@ describe ('middlewares', function () {
   })
 
   it ('should get user array with query attribute exclude', function (done) {
-    
+
     let querystring = qs.stringify({
       _attributes: {
         exclude: ['id']
@@ -959,7 +955,7 @@ describe ('middlewares', function () {
   })
 
   it ('should get user array with query attribute exclude string', function (done) {
-    
+
     let querystring = qs.stringify({
       _attributes: {
         exclude: 'id'
@@ -1009,7 +1005,7 @@ describe ('middlewares', function () {
   })
 
   it ('should get an user with query attribute', function (done) {
-    
+
     let querystring = qs.stringify({
       _attributes: 'id'
     });
@@ -1029,7 +1025,7 @@ describe ('middlewares', function () {
   })
 
   it ('should get an user with query attributes', function (done) {
-    
+
     let querystring = qs.stringify({
       _attributes: ['id', 'login']
     });
@@ -1053,7 +1049,7 @@ describe ('middlewares', function () {
     let querystring = qs.stringify({
       _attributes: 'name'
     });
-    
+
     server
       .get(`/user/1/tags?${querystring}`)
       .expect(200)
@@ -1082,7 +1078,7 @@ describe ('middlewares', function () {
         'id DESC',
       ]
     });
-    
+
     server
       .get(`/tag?${querystring}`)
       .expect(200)
@@ -1110,7 +1106,7 @@ describe ('middlewares', function () {
         'name DESC'
       ]
     });
-    
+
     server
       .get(`/tag?${querystring}`)
       .expect(200)
@@ -1138,7 +1134,7 @@ describe ('middlewares', function () {
         ['name', 'DESC']
       ]
     });
-    
+
     server
       .get(`/user/1/tags?${querystring}`)
       .expect(200)
@@ -1225,8 +1221,8 @@ describe ('middlewares', function () {
 
     let querystring = qs.stringify({
       _include: [
-        { association: 'profile' },
-        { association: 'tags' }
+      { association: 'profile' },
+      { association: 'tags' }
       ]      
     });
 
@@ -1241,8 +1237,8 @@ describe ('middlewares', function () {
         debug(body.tags);
         debug(body.profile);
         assert(body.tags)
-        assert(body.profile.id)
-        assert(body.profile.user_id === 1);
+          assert(body.profile.id)
+          assert(body.profile.user_id === 1);
         done();
       })
   })
@@ -1264,8 +1260,8 @@ describe ('middlewares', function () {
         debug(body.tags);
         debug(body.profile);
         assert(body.tags)
-        assert(body.profile.id)
-        assert(body.profile.user_id === 1);
+          assert(body.profile.id)
+          assert(body.profile.user_id === 1);
         done();
       })
   })
@@ -1285,7 +1281,7 @@ describe ('middlewares', function () {
         assert('object' === typeof body);
         debug(body.profile);
         assert(body.profile.id)
-        assert(body.profile.user_id === 1);
+          assert(body.profile.user_id === 1);
         done();
       })
   })
@@ -1341,7 +1337,7 @@ describe ('middlewares', function () {
       })
 
   })
-  
+
   /*
    * with schema
    */
@@ -1524,8 +1520,6 @@ describe ('middlewares', function () {
           assert(body[0].id !== 0);
           done();
         })
-
     })
   })
 })
-
