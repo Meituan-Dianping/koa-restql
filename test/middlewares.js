@@ -1,6 +1,6 @@
 'use strict'
 
-const Restql = require('../lib/Restql');
+const RestQL = require('../lib/RestQL');
 const common = require('./lib/common');
 
 const qs      = common.qs;
@@ -24,7 +24,7 @@ describe ('middlewares', function () {
       constraints: false
     });
 
-    let restql = new Restql(models);
+    let restql = new RestQL(models);
 
     app.use(restql.routes());
     server = request(http.createServer(app.callback()));
