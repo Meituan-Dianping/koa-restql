@@ -280,7 +280,7 @@ describe ('middlewares', function () {
       .end(done);
   })
 
-  it.only ('should return a 409 when create user_tag', function (done) {
+  it ('should return a 409 when create user_tag', function (done) {
 
     let data = {
       user_id : 1,
