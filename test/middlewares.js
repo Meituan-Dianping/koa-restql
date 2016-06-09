@@ -280,6 +280,34 @@ describe ('middlewares', function () {
       .end(done);
   })
 
+  it.only ('should return a 409 when create user_tag', function (done) {
+
+    let data = {
+      user_id : 1,
+      tag_id  : 1
+    }
+
+    /***
+     * this is a test
+     * DO NOT USE it in model define
+     */
+    models.user_tags.uniqueKeys = {};
+    models.user_tags.options.indexes = [{
+      unique: 'true',
+      name: 'user_tags_user_id_tag_id_unique',
+      fields: ['user_id', 'tag_id']
+    }];
+
+    debug(models.user_tags.uniqueKeys);
+    debug(models.user_tags.options.indexes);
+
+    server
+      .post('/user_tags')
+      .send(data)
+      .expect(409)
+      .end(done);
+  })
+
   it ('should create a user_tag without 409', function (done) {
 
     models.user_tags.findAll().then(userTags => {
