@@ -162,6 +162,37 @@ describe ('middlewares', function () {
       email : 'dean@gmail.com'
     }
 
+    /***
+     * test sequelize polyfill
+     */
+    models.user.uniqueKeys = {};
+    models.user.options.indexes = [{
+      unique: 'true',
+      name: 'user_login',
+      fields: ['login']
+    }];
+
+    server
+      .post('/user')
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        server
+          .post('/user')
+          .send(data)
+          .expect(409)
+          .end(done);
+      })
+  })
+
+  it ('should return a 409 when create an user', function (done) {
+
+    let data = {
+      login : 'dean',
+      email : 'dean@gmail.com'
+    }
+
     server
       .post('/user')
       .send(data)
@@ -288,8 +319,7 @@ describe ('middlewares', function () {
     }
 
     /***
-     * this is a test
-     * DO NOT USE it in model define
+     * test sequelize polyfill
      */
     models.user_tags.uniqueKeys = {};
     models.user_tags.options.indexes = [{

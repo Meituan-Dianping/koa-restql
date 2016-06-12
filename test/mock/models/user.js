@@ -8,12 +8,9 @@ module.exports.attributes = (DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },   
-    // login : {
-    //   type: DataTypes.STRING,
-    //   unique: true
-    // }, 
     login : {
       type: DataTypes.STRING,
+      unique: true
     }, 
     email : DataTypes.STRING,
     deleted_at : {
@@ -30,12 +27,6 @@ module.exports.attributes = (DataTypes) => {
 }
 
 module.exports.options = {
-
-  indexes: [{
-    type: 'unique',
-    name: 'user_login',
-    fields: ['login']
-  }],
 
   classMethods: {
     associate: (models) => {
