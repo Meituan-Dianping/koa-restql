@@ -167,7 +167,7 @@ describe ('middlewares', function () {
      */
     models.user.uniqueKeys = {};
     models.user.options.indexes = [{
-      unique: 'true',
+      unique: true,
       name: 'user_login',
       fields: ['login']
     }];
@@ -323,7 +323,7 @@ describe ('middlewares', function () {
      */
     models.user_tags.uniqueKeys = {};
     models.user_tags.options.indexes = [{
-      unique: 'true',
+      unique: true,
       name: 'user_tags_user_id_tag_id_unique',
       fields: ['user_id', 'tag_id']
     }];
