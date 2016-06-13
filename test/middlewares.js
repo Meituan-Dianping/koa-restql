@@ -499,6 +499,14 @@ describe ('middlewares', function () {
       })
   })
 
+  it ('should get 404 when get user 100 profile', function (done) {
+
+    server
+      .get('/user/100/profile')
+      .expect(404)
+      .end(done)
+  })
+
   it ('should update user profile', function (done) {
 
     let data = {
