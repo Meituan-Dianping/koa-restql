@@ -46,11 +46,9 @@ module.exports.options = {
       models.user.belongsToMany(models.tag, {
         as: 'tags',
         constraints: false,
-        through: {
-          model: models.user_tags,
-          foreignKey: 'user_id',
-          otherKey: 'tag_id',
-        }
+        through:  models.user_tags,
+        foreignKey: 'user_id',
+        otherKey: 'tag_id',
       })
     }
   }
