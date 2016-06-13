@@ -1306,7 +1306,6 @@ describe ('middlewares', function () {
       })    
   })
 
-
   it ('should get an user with profile & tags | object array', function (done) {
 
     let querystring = qs.stringify({
