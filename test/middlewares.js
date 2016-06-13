@@ -1275,12 +1275,43 @@ describe ('middlewares', function () {
       })
   })
 
+  it ('should get users who has profile', function (done) {
+
+    let data = {
+      login: 'dean'
+    }
+
+    let querystring = qs.stringify({
+      _include: [
+        { association: 'profile', required: true },
+      ]      
+    });
+
+    server
+      .post('/user')
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        server
+          .get(`/user?${querystring}`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(body.every(user => user.login !== data.login));
+            done();
+          })
+      })    
+  })
+
   it ('should get an user with profile & tags | object array', function (done) {
 
     let querystring = qs.stringify({
       _include: [
-      { association: 'profile' },
-      { association: 'tags' }
+        { association: 'profile' },
+        { association: 'tags' }
       ]      
     });
 
