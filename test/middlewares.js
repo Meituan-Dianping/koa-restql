@@ -156,7 +156,7 @@ describe ('middlewares', function () {
       })
   })
 
-  it.only ('should create a bulk of users', function (done) {
+  it ('should create a bulk of users', function (done) {
 
     let data = [{
       login : 'dean',
