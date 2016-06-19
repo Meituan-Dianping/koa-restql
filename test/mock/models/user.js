@@ -10,7 +10,6 @@ module.exports.attributes = (DataTypes) => {
     },   
     login : {
       type: DataTypes.STRING,
-      unique: true
     }, 
     email : DataTypes.STRING,
     deleted_at : {
@@ -28,18 +27,22 @@ module.exports.attributes = (DataTypes) => {
 
 module.exports.options = {
 
+  indexes: [{
+    type: 'unique',
+    name: 'user_login_unique',
+    fields: ['login']
+  }],
+
   classMethods: {
     associate: (models) => {
 
       models.user.hasOne(models.profile, {
         as: 'profile',
-        foreignKey: 'user_id',
         constraints: false
       });
 
       models.user.hasMany(models.department, {
         as: 'departments',
-        foreignKey: 'user_id',
         constraints: false
       });
 

@@ -156,6 +156,38 @@ describe ('middlewares', function () {
       })
   })
 
+  it ('should update a user', function (done) {
+
+    let querystring = qs.stringify({
+      _ignoreDuplicates: true
+    });
+
+    models.user.findById(1)
+      .then(data => {
+
+        data.email = 'updated@gmail.com';
+
+        server
+          .post(`/user?${querystring}`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            assert(typeof body === 'object');
+            debug(body);
+            assert(body.login === data.login);
+            assert(body.email === data.email);
+
+            models.user.findById(body.id).then(user => {
+              assert(user.login === body.login);
+              assert(user.email === body.email);
+              done();
+            }).catch (done);
+          })
+      })
+  })
+
   it ('should create a bulk of users', function (done) {
 
     let data = [{
@@ -199,20 +231,15 @@ describe ('middlewares', function () {
 
   it ('should return a 409 when create an user', function (done) {
 
-    let data = {
-      login : 'dean',
-      email : 'dean@gmail.com'
-    }
-
     /***
      * test sequelize polyfill
      */
     models.user.uniqueKeys = {};
-    models.user.options.indexes = [{
-      unique: true,
-      name: 'user_login',
-      fields: ['login']
-    }];
+
+    let data = {
+      login : 'dean',
+      email : 'dean@gmail.com'
+    }
 
     server
       .post('/user')
