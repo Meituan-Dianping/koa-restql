@@ -22,7 +22,7 @@ module.exports.options = {
 
   classMethods: {
     associate: (models) => {
-      models.department.hasOne(models.user, {
+      models.department.belongsTo(models.user, {
         as: 'master',
         foreignKey: 'user_id',
         constraints: false

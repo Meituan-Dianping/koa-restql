@@ -6,6 +6,7 @@ const koa       = require('koa');
 const util      = require('util');
 const path      = require('path');
 const http      = require('http');
+const uuid      = require('node-uuid');
 const debug     = require('debug');
 const assert    = require('assert');
 const request   = require('supertest');
@@ -108,6 +109,7 @@ module.exports = {
   path, 
   util,
   debug, 
+  uuid,
   http, 
   assert,
   methods,

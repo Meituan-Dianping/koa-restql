@@ -7,6 +7,7 @@ const qs      = common.qs;
 const koa     = common.koa;
 const util    = common.util;
 const http    = common.http;
+const uuid    = common.uuid;
 const Router  = common.Router;
 const assert  = common.assert;
 const request = common.request;
@@ -155,22 +156,90 @@ describe ('middlewares', function () {
       })
   })
 
-  it ('should return a 409 when create an user', function (done) {
+  it ('should update a user', function (done) {
 
-    let data = {
+    let querystring = qs.stringify({
+      _ignoreDuplicates: true
+    });
+
+    models.user.findById(1)
+      .then(data => {
+
+        data.email = 'updated@gmail.com';
+
+        server
+          .post(`/user?${querystring}`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            assert(typeof body === 'object');
+            debug(body);
+            assert(body.login === data.login);
+            assert(body.email === data.email);
+
+            models.user.findById(body.id).then(user => {
+              assert(user.login === body.login);
+              assert(user.email === body.email);
+              done();
+            }).catch (done);
+          })
+      })
+  })
+
+  it ('should create a bulk of users', function (done) {
+
+    let data = [{
       login : 'dean',
       email : 'dean@gmail.com'
-    }
+    }, {
+      login : 'sam',
+      email : 'sam@gmail.com'
+    }]
+
+    server
+      .post('/user')
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        let body = res.body;
+        assert(Array.isArray(body));
+        assert(body.length === 2);
+
+        debug(body);
+        
+        let promises = body.map((user, index) => {
+
+          assert(user.login === data[index].login);
+          assert(user.email === data[index].email);
+
+          return models.user.findById(user.id).then(result => {
+            assert(user.login === result.login);
+            assert(user.email === result.email);
+          })
+        })
+
+        Promise.all(promises)
+          .then(users => {
+            done();   
+          })
+          .catch(done);
+      })
+  })
+
+  it ('should return a 409 when create an user', function (done) {
 
     /***
      * test sequelize polyfill
      */
     models.user.uniqueKeys = {};
-    models.user.options.indexes = [{
-      unique: true,
-      name: 'user_login',
-      fields: ['login']
-    }];
+
+    let data = {
+      login : 'dean',
+      email : 'dean@gmail.com'
+    }
 
     server
       .post('/user')
@@ -1464,7 +1533,7 @@ describe ('middlewares', function () {
 
     let users = [];
     for (let i = 0; i < count; i ++) {
-      let name = `user-${i}`;
+      let name = `user-${i}-${uuid.v4()}`;
       users.push({
         login : name,
         email : `${name}@gmail.com`
@@ -1479,6 +1548,7 @@ describe ('middlewares', function () {
     const CREATE_USER_COUNT = 20;
 
     createMockUsers(CREATE_USER_COUNT).then(users => {
+      debug(users);
       server
         .get(`/user`)
         .expect(200)
