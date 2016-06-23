@@ -1355,7 +1355,7 @@ describe ('middlewares', function () {
   it ('should get an user with query include tags', function (done) {
 
     let querystring = qs.stringify({
-      _include: ['tags', 'xxx']
+      _include: ['tags', 'notExists']
     });
 
     server
@@ -1367,7 +1367,7 @@ describe ('middlewares', function () {
         assert('object' === typeof body);
         debug(body.tags);
         assert(Array.isArray(body.tags));
-        assert(!body.xxx);
+        assert(!body.notExists);
         done();
       })
   })
