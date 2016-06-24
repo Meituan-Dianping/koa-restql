@@ -202,12 +202,20 @@ RestQL could do every CRUD options for you. Just choose the right HTTP method to
 
 Supported HTTP verbs:
 
-HTTP verb | CRUD   | List | Single |
---------- | ------ | ---- | ------ |
-GET       | Read   | √    | √      |
-POST      | Create | √    | ×      |
-PUT       | Update | ×    | √      |
-DELETE    | Delete | √    | √      |
+HTTP verb | CRUD          |
+--------- | ------------- |
+GET       | Read          |
+POST      | Create        |
+PUT       | Create/Update |
+DELETE    | Delete        |
+
+
+Supported HTTP method with body:
+
+HTTP verb | List         | Single |
+--------- | ------------ | ------ |
+POST      | Array/Object | ×      |
+PUT       | Array/Object | Object |
 
 
 * `List` path examples:
@@ -217,6 +225,11 @@ DELETE    | Delete | √    | √      |
 * `Single` path examples:
 	* `/resource/:id`
 	* `1:1` association
+
+***Note***: At the moment, we have not implemented the following operation:
+
+* Delete a list.
+* Create/Update a list
 
 To use `POST` or `PUT` method, you should put data into request body. Example:
 
