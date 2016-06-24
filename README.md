@@ -39,50 +39,52 @@ Using `querystring` in your url can add condition or limit for the request. For 
 
 * Request
 
-	```
-	GET /user
-	```
+    ```
+    GET /user
+    ```
 
 * Response
 
-	```
-	HTTP/1.1 206 Partial Content
-	X-Range:items 0-2/10
+    ```
+    HTTP/1.1 206 Partial Content
+    X-Range:items 0-2/10
+    ```
 
-	[
-	  {
-	    "id": 1,
-	    "name": "Li Xin"
-	  },
-	  {
-	    "id": 2,
-	    "name": "Zhang Chi"
-	  }
-	]
-	```
+    ```
+    [
+      {
+        "id": 1,
+        "name": "Li Xin"
+      },
+      {
+        "id": 2,
+        "name": "Zhang Chi"
+      }
+    ]
+    ```
 
-	***Note***:
-	* Request for a list will always respond an array.
-	* This response example include necessary HTTP headers to explain how `Partial Content` works. If the response was just part of the list, the API would like to response HTTP status code [206][1].
+    ***Note***:
+    * Request for a list will always respond an array.
+    * This response example include necessary HTTP headers to explain how `Partial Content` works. If the response was just part of the list, the API would like to response HTTP status code [206][1].
 
 ### Single
 
 * Request
 
-	```
-	GET /user/1
-	```
+    ```
+    GET /user/1
+    ```
 
 * Response
 
-	```
-	{
-	  "id": 1,
-	  "name": "Li Xin"
-	}
-	```
+    ```
+    {
+      "id": 1,
+      "name": "Li Xin"
+    }
+    ```
 
-	***Note***: Request path with id will always respond an object.
+    ***Note***: Request path with id will always respond an object.
 
 ### Association
 
@@ -92,20 +94,20 @@ To define an 1:1 association with sequelize, use [`model.hasOne()`][3] or [`mode
 
 * Request
 
-	```
-	GET /user/1/profile
-	```
+    ```
+    GET /user/1/profile
+    ```
 
 * Response
 
-	```
-	{
-	  "id": 1,
-	  "user_id": 1,
-	  "site": "https://github.com/crzidea"
-	}
-	```
-	***Note***: This example is for `hasOne()`. If the `profile` was an association defined with `belongTo()`, there should not be `user_id` field.
+    ```
+    {
+      "id": 1,
+      "user_id": 1,
+      "site": "https://github.com/crzidea"
+    }
+    ```
+    ***Note***: This example is for `hasOne()`. If the `profile` was an association defined with `belongTo()`, there should not be `user_id` field.
 
 #### 1:N
 
@@ -115,41 +117,41 @@ To define an 1:N association with sequelize, use [`model.belongsTo()`][5].
 
 * Request
 
-	```
-	GET /user/1/messages
-	```
+    ```
+    GET /user/1/messages
+    ```
 
 * Response
 
-	```
-	[
-	  {
-	    "id": 1,
-	    "content": "hello"
-	  },
-	  {
-	    "id": 2,
-	    "content": "world"
-	  }
-	]
-	```
+    ```
+    [
+      {
+        "id": 1,
+        "content": "hello"
+      },
+      {
+        "id": 2,
+        "content": "world"
+      }
+    ]
+    ```
 
 ##### Single
 
 * Request
 
-	```
-	GET /user/1/messages/2
-	```
+    ```
+    GET /user/1/messages/2
+    ```
 
 * Response
 
-	```
-	{
-	  "id": 2,
-	  "content": "world"
-	}
-	```
+    ```
+    {
+      "id": 2,
+      "content": "world"
+    }
+    ```
 
 #### N:M
 
@@ -159,24 +161,24 @@ Basicly, you can use the same way to request n:n association as [1:N association
 
 * Request
 
-	```
-	GET /user/1/friends/2
-	```
+    ```
+    GET /user/1/friends/2
+    ```
 
 * Response
 
-	```
-	{
-	  "id": 2,
-	  "name": "Zhang Chi",
-	  "friendship": {
-	    "id": 1,
-	    "user_id": 1,
-	    "friend_id": 2
-	  }
-	}
-	```
-	***Note***: RestQL will respond the target model with another model referred `through` option.
+    ```
+    {
+      "id": 2,
+      "name": "Zhang Chi",
+      "friendship": {
+        "id": 1,
+        "user_id": 1,
+        "friend_id": 2
+      }
+    }
+    ```
+    ***Note***: RestQL will respond the target model with another model referred `through` option.
 
 Another noticeable problem is, you can not do the following query with association path although it is supported by sequelize:
 
@@ -219,12 +221,12 @@ PUT       | Array/Object | Object |
 
 
 * `List` path examples:
-	* `/resource`
-	* `1:n` association
-	* `n:m` association
+    * `/resource`
+    * `1:n` association
+    * `n:m` association
 * `Single` path examples:
-	* `/resource/:id`
-	* `1:1` association
+    * `/resource/:id`
+    * `1:1` association
 
 ***Note***: At the moment, we have not implemented the following operations:
 
@@ -255,46 +257,46 @@ To understand RestQL querystring, there are only 3 rules:
 
 * Every keys in querystring **not** start with `_`, will be directly used as `where` option for `sequelize#query()`. Example:
 
-	```js
-	// query
-	{
-	  name: "Li Xin"
-	}
-	// option for sequelize
-	{
-	  where: {
-	    name: "Li Xin"
-	  }
-	}
-	```
+    ```js
+    // query
+    {
+      name: "Li Xin"
+    }
+    // option for sequelize
+    {
+      where: {
+        name: "Li Xin"
+      }
+    }
+    ```
 
 * Every keys in querystring start with `_`, will be directly used as `sequelize#query()`.
 
-	```js
-	// query
-	{
-	  _limit: 10
-	}
-	// option for sequelize
-	{
-	  limit: 10
-	}
-	```
+    ```js
+    // query
+    {
+      _limit: 10
+    }
+    // option for sequelize
+    {
+      limit: 10
+    }
+    ```
 
 * `include` option for `sequelize#query()` should be passed as `String` of association name.
 
-	```js
-	// query
-	{
-	  _include: ['friends']
-	}
-	// option for sequelize
-	{
-	  include: [
-	    models.user.association.friends
-	  ]
-	}
-	```
+    ```js
+    // query
+    {
+      _include: ['friends']
+    }
+    // option for sequelize
+    {
+      include: [
+        models.user.association.friends
+      ]
+    }
+    ```
 
 ### Access Control
 
@@ -307,31 +309,31 @@ This document will only talk about the 2nd way,. And the option was only support
 
 1. To specify which association should not be accessed by RestQL, add `ignore` option. Example:
 
-	```js
-	models.user.hasOne(
-	  user,
-	  {
-	    as: 'privacy',
-	    restql: {
-	      ignore: true
-	    }
-	  }
-	)
-	```
+    ```js
+    models.user.hasOne(
+      user,
+      {
+        as: 'privacy',
+        restql: {
+          ignore: true
+        }
+      }
+    )
+    ```
 
 2. To specify an association should not be accessed by specific HTTP method, add the method to `ignore` as an array element. Example:
 
-	```js
-	models.user.hasOne(
-	  user,
-	  {
-	    as: 'privacy',
-	    restql: {
-	      ignore: ['get']
-	    }
-	  }
-	)
-	```
+    ```js
+    models.user.hasOne(
+      user,
+      {
+        as: 'privacy',
+        restql: {
+          ignore: ['get']
+        }
+      }
+    )
+    ```
 
 ## Running tests
 
