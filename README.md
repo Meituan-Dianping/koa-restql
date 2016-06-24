@@ -226,7 +226,7 @@ PUT       | Array/Object | Object |
 	* `/resource/:id`
 	* `1:1` association
 
-***Note***: At the moment, we have not implemented the following operation:
+***Note***: At the moment, we have not implemented the following operations:
 
 * Delete a list.
 * Create/Update a list
