@@ -238,7 +238,7 @@ Example:
 qs.stringify({a: 1, b:2}) // => a=1&b=2
 ```
 
-To understand RestQL querystring, there is only 3 rules:
+To understand RestQL querystring, there are only 3 rules:
 
 * Every keys in querystring **not** start with `_`, will be directly used as `where` option for `sequelize#query()`. Example:
 
@@ -285,7 +285,7 @@ To understand RestQL querystring, there is only 3 rules:
 
 ### Access Control
 
-There is at least 2 ways to implement the `Access Control`:
+There are at least 2 ways to implement the `Access Control`:
 
 1. Add another middleware before request be handled by RestQL.
 2. Add options on `sequelize#model#associations`, RestQL will handle the options.
