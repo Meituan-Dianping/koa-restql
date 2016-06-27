@@ -94,7 +94,7 @@ describe ('middlewares', function () {
           $like: 'da%'
         }
       },{
-        login: {
+        email: {
           $like: 'ggg%'
         }
       }]
