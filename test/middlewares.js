@@ -156,6 +156,42 @@ describe ('middlewares', function () {
       })
   })
 
+  it.only ('should update an user with put', function (done) {
+    
+    let id = 1;
+
+    models.user.findById(id).then(data => {
+
+      data = data.dataValues;
+      let email = 'updated@email.com';
+      
+      data.email = email;
+      debug(data);
+
+      server
+        .put('/user')
+        .send(data)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(typeof body === 'object');
+          debug(body);
+          assert(body.id === id);
+          assert(body.login === data.login);
+          assert(body.email === data.email);
+
+          models.user.findById(id).then(user => {
+            assert(user.login === body.login);
+            assert(user.email === body.email);
+            done();
+          }).catch (done);
+        })
+
+    })
+
+  })
+
   it ('should create an user', function (done) {
 
     let data = {
