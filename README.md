@@ -222,11 +222,13 @@ PUT       | Array/Object | Object |
 
 * `List` path examples:
     * `/resource`
-    * `1:n` association
-    * `n:m` association
+    * `/resource/:id/association`, association is `1:n` relationship
+    * `/resource/:id/association`, association is `n:m` relationship
 * `Single` path examples:
     * `/resource/:id`
-    * `1:1` association
+    * `/resource/:id/association`, association is `1:1` relationship
+    * `/resource/:id/association/:id`, association is `1:n` relationship
+    * `/resource/:id/association/:id`, association is `n:m` relationship
 
 ***Note***: At the moment, we have not implemented the following operations:
 
