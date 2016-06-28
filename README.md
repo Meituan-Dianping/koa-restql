@@ -222,11 +222,13 @@ PUT       | Array/Object | Object |
 
 * `List` path examples:
     * `/resource`
-    * `1:n` association
-    * `n:m` association
+    * `/resource/:id/association`, association is `1:n` relationship
+    * `/resource/:id/association`, association is `n:m` relationship
 * `Single` path examples:
     * `/resource/:id`
-    * `1:1` association
+    * `/resource/:id/association`, association is `1:1` relationship
+    * `/resource/:id/association/:id`, association is `1:n` relationship
+    * `/resource/:id/association/:id`, association is `n:m` relationship
 
 ***Note***: At the moment, we have not implemented the following operations:
 
@@ -297,6 +299,8 @@ To understand RestQL querystring, there are only 3 rules:
       ]
     }
     ```
+
+Sometimes, you want modify `query` in your own middleware. To do so, you should modify `this.restql.query` instead of `this.request.query` or `this.query`, because the `query` MUST be parsed with the package `qs`, not `querystring` (which is default package of koa).
 
 ### Access Control
 
