@@ -300,6 +300,8 @@ To understand RestQL querystring, there are only 3 rules:
     }
     ```
 
+Sometimes, you want modify `query` in your own middleware. To do so, you should modify `this.restql.query` instead of `this.request.query` or `this.query`, because the `query` MUST be parsed with the package `qs`, not `querystring` (which is default package of koa).
+
 ### Access Control
 
 There are at least 2 ways to implement the `Access Control`:
