@@ -119,7 +119,7 @@ describe ('middlewares', function () {
       })
   })
 
-  it.only ('should update an user', function (done) {
+  it ('should update an user', function (done) {
 
     const data = {
       login : 'sam',
@@ -148,6 +148,62 @@ describe ('middlewares', function () {
         }).catch (done);
       })
   })
+
+  it ('should update an user id = 100', function (done) {
+
+    const id = 100;
+
+    const data = {
+      login : 'sam',
+      email : 'sam@gmail.com'
+    }
+
+    server
+      .put(`/user/${id}`)
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        let body = res.body;
+        assert(typeof body === 'object');
+        debug(body);
+        assert(body.id === id);
+        assert(body.login === data.login);
+        assert(body.email === data.email);
+
+        models.user.findById(id).then(user => {
+          assert(user.login === body.login);
+          assert(user.email === body.email);
+          done();
+        }).catch (done);
+      })
+  })
+
+  it ('should return 400 when body is an array', function (done) {
+
+    const id = 1;
+
+    server
+      .put(`/user/${id}`)
+      .send([])
+      .expect(400)
+      .end(done);
+  })
+
+  //it.only ('should return 400 when body has not unique index fields', function (done) {
+
+  //  const id = 1;
+
+  //  const data = {
+  //    email : 'sam@gmail.com'
+  //  }
+
+  //  server
+  //    .put(`/user/${id}`)
+  //    .send(data)
+  //    .expect(400)
+  //    .end(done);
+  //})
 
   it ('should update an user with put', function (done) {
     
