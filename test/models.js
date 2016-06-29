@@ -12,40 +12,29 @@ const Router  = common.Router;
 const assert  = common.assert;
 const request = common.request;
 const models  = common.sequelize.models;
-const debug   = common.debug('koa-restql:test:middlewares');
+const debug   = common.debug('koa-restql:test:models');
 
 describe ('middlewares', function () {
   let server = null;
 
   before (function () {
-    let app = koa();
-    models.user.hasMany(models.department, {
-      as: 'departments',
-      foreignKey: 'user_id',
-      constraints: false
-    });
 
-    let restql = new RestQL(models);
+    let app = koa()
+      , restql = new RestQL(models);
 
     app.use(restql.routes());
     server = request(http.createServer(app.callback()));
   })
 
   beforeEach (function (done) {
-    /*
-     * clean db
-     */
-    debug('clean db');
+
+    debug('reset db');
     common.loadMockData().then(() => {
       done();
     }).catch(err => {
       done(err);
     });
   })
-
-  /*
-   * without association
-   */
 
   it ('should get user array', function (done) {
 
@@ -62,81 +51,85 @@ describe ('middlewares', function () {
       })
   })
 
-  it ('should get user array', function (done) {
+  //it ('should get user array and id > 1', function (done) {
 
-    let querystring = {
-      id: {
-        $gt: 1
-      }
-    }
+  //  let querystring = {
+  //    id: {
+  //      $gt: 1
+  //    }
+  //  }
 
-    server
-      .get(`/user?${qs.stringify(querystring)}`)
-      .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
-        let body = res.body;
-        assert(Array.isArray(body));
-        debug(body);
-        assert(body.length === 1);
-        body.forEach(user => {
-          assert(user.id > 1);
-        })
-        done();
-      })
-  })
+  //  server
+  //    .get(`/user?${qs.stringify(querystring)}`)
+  //    .expect(200)
+  //    .end((err, res) => {
+  //      if (err) return done(err);
+  //      let body = res.body;
+  //      assert(Array.isArray(body));
+  //      debug(body);
+  //      assert(body.length === 1);
+  //      body.forEach(user => {
+  //        assert(user.id > 1);
+  //      })
+  //      done();
+  //    })
+  //})
 
-  it ('should get users which id like da%', function (done) {
+  // it ('should get users which id like da%', function (done) {
 
-    let querystring = {
-      $or: [{
-        login: {
-          $like: 'da%'
-        }
-      },{
-        email: {
-          $like: 'ggg%'
-        }
-      }]
-    }
+  //   let querystring = {
+  //     $or: [{
+  //       login: {
+  //         $like: 'da%'
+  //       }
+  //     },{
+  //       email: {
+  //         $like: 'ggg%'
+  //       }
+  //     }]
+  //   }
 
-    server
-      .get(`/user?${qs.stringify(querystring)}`)
-      .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
-        let body = res.body;
-        assert(Array.isArray(body));
-        debug(body);
-        assert(body.length === 1);
-        done();
-      })
-  })
+  //   server
+  //     .get(`/user?${qs.stringify(querystring)}`)
+  //     .expect(200)
+  //     .end((err, res) => {
+  //       if (err) return done(err);
+  //       let body = res.body;
+  //       assert(Array.isArray(body));
+  //       debug(body);
+  //       assert(body.length === 1);
+  //       done();
+  //     })
+  // })
 
   it ('should get an user', function (done) {
 
+    const id = 1;
+
     server
-      .get('/user/1')
+      .get(`/user/${id}`)
       .expect(200)
       .end((err, res) => {
         if (err) return done(err);
         let body = res.body;
         assert(typeof body === 'object');
         debug(body);
-        assert(body.id === 1);
+        assert(body.id === id);
         done();
       })
   })
 
-  it ('should update an user', function (done) {
+  it.only ('should update an user', function (done) {
 
-    let data = {
+    const data = {
       login : 'sam',
       email : 'sam@gmail.com'
     }
 
+    const id = 1;
+
     server
-      .put('/user/1')
+      .put(`/user/${id}`)
       .send(data)
       .expect(200)
       .end((err, res) => {
@@ -144,11 +137,11 @@ describe ('middlewares', function () {
         let body = res.body;
         assert(typeof body === 'object');
         debug(body);
-        assert(body.id === 1);
+        assert(body.id === id);
         assert(body.login === data.login);
         assert(body.email === data.email);
 
-        models.user.findById(1).then(user => {
+        models.user.findById(id).then(user => {
           assert(user.login === body.login);
           assert(user.email === body.email);
           done();
@@ -156,7 +149,7 @@ describe ('middlewares', function () {
       })
   })
 
-  it.only ('should update an user with put', function (done) {
+  it ('should update an user with put', function (done) {
     
     let id = 1;
 
