@@ -190,6 +190,102 @@ describe ('middlewares', function () {
       .end(done);
   })
 
+  it ('should create a user use put', function (done) {
+
+    const data = {
+      login : 'sam',
+      email : 'sam@gmail.com'
+    }
+
+    server
+      .put(`/user/`)
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        let body = res.body;
+        assert(typeof body === 'object');
+        debug(body);
+        assert(body.id);
+        assert(body.login === data.login);
+        assert(body.email === data.email);
+
+        models.user.findById(body.id).then(user => {
+          assert(user.login === body.login);
+          assert(user.email === body.email);
+          done();
+        }).catch (done);
+      })
+  })
+ 
+  it ('should return 400 create a user use put', function (done) {
+
+    const data = {
+      email : 'sam@gmail.com'
+    }
+
+    server
+      .put(`/user/`)
+      .send(data)
+      .expect(400)
+      .end(done);
+  })
+
+  it ('should create users use put', function (done) {
+
+    const data = [{
+      login : 'sam',
+      email : 'sam@gmail.com'
+    }, {
+      login : 'dean',
+      email : 'dean@gmail.com'
+    }]
+
+    server
+      .put(`/user/`)
+      .send(data)
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        let body = res.body;
+        assert(Array.isArray(body));
+        assert(body.length === data.length);
+
+        debug(body);
+
+        let promises = []
+        body.forEach((item, index) => {
+          assert(item.id);
+          assert(item.login === data[index].login);
+          assert(item.email === data[index].email);
+
+          promises.push(
+            models.user.findById(item.id).then(user => {
+              assert(user.login === item.login);
+              assert(user.email === item.email);
+            }))
+        })
+
+        Promise.all(promises).then(() => done()).catch(done);
+      })
+  })
+
+  it.only ('should return 400 when create users use put', function (done) {
+
+    const data = [{
+      email : 'sam@gmail.com'
+    }, {
+      login : 'dean',
+      email : 'dean@gmail.com'
+    }]
+
+    server
+      .put(`/user/`)
+      .send(data)
+      .expect(400)
+      .end(done); 
+  })
+
   //it.only ('should return 400 when body has not unique index fields', function (done) {
 
   //  const id = 1;
