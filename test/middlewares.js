@@ -847,6 +847,38 @@ describe ('middlewares', function () {
       })    
   })
 
+  it ('should create an array of departments', function (done) {
+
+    let data = [{
+      description : 'MT'
+    }, {
+      description : 'DP'
+    }]
+
+    server
+      .post(`/user/1/departments`)
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        let body = res.body;
+        debug(body);
+        assert(Array.isArray(body));
+        assert(body.length === 2);
+
+        let promises = body.map(department => {
+          assert(department.user_id);
+          return models.department.find({
+            id : department.id,
+          }).then(res => {
+            assert(res);
+          });
+        }) 
+
+        Promise.all(promises).then(() => done());
+      })
+  })
+
   it ('should get an user department', function (done) {
 
     server
@@ -941,6 +973,82 @@ describe ('middlewares', function () {
           done();
         }).catch (done);
       })
+  })
+
+  it ('should assocition a tag', function (done) {
+
+    let data = {
+      name : 'MIT'
+    }
+
+    let querystring = qs.stringify({
+      _ignoreDuplicates: true
+    })
+
+    models.tag.create(data)
+      .then(tag => {
+        server
+          .post(`/user/1/tags?${querystring}`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(body.id);
+            assert(body.name === tag.name);
+
+            models.user_tags.findOne({
+              where: {
+                user_id : 1,
+                tag_id  : tag.id
+              }
+            }).then(userTag => {
+              assert(userTag);
+              done();
+            })
+          })
+      })
+      .catch(done);
+  })
+
+  it ('should assocition a tags', function (done) {
+
+    let data = [{
+      name : 'MT'
+    }, {
+      name : 'DP'
+    }]
+
+    let querystring = qs.stringify({
+      _ignoreDuplicates: true
+    })
+
+    models.tag.bulkCreate(data)
+      .then(() => {
+        server
+          .post(`/user/1/tags?${querystring}`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 2);
+
+            let promises = body.map(tag => {
+              return models.user_tags.find({
+                tag_id  : tag.id,
+                user_id : 1,
+              }).then(userTag => {
+                assert(userTag);
+              });
+            }) 
+
+            Promise.all(promises).then(() => done());
+          })
+      }).catch(done);
   })
 
   it ('should get an user tag', function (done) {
