@@ -1012,6 +1012,46 @@ describe ('middlewares', function () {
       .catch(done);
   })
 
+  it.only ('should assocition a tag only use id', function (done) {
+
+    let data = {
+      name : 'MIT'
+    }
+
+    let querystring = qs.stringify({
+      _ignoreDuplicates: true
+    })
+
+    models.tag.create(data)
+      .then(tag => {
+        server
+          .post(`/user/1/tags?${querystring}`)
+          .send({ id: tag.id })
+          .expect(201)
+          .end((err, res) => {
+            debug(tag);
+            if (err) return done(err);
+
+            let body = res.body;
+
+            debug(body);
+            assert(body.id);
+            assert(body.name === tag.name);
+
+            models.user_tags.findOne({
+              where: {
+                user_id : 1,
+                tag_id  : tag.id
+              }
+            }).then(userTag => {
+              assert(userTag);
+              done();
+            })
+          })
+      })
+      .catch(done);
+  })
+
   it ('should assocition a tags', function (done) {
 
     let data = [{
