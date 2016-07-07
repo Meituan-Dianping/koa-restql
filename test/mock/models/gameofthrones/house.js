@@ -3,6 +3,7 @@
 module.exports.attributes = (DataTypes) => {
 
   return {
+
     id : {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -10,6 +11,12 @@ module.exports.attributes = (DataTypes) => {
     },   
 
     name : {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: ''
+    }, 
+
+    words : {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: ''
@@ -25,7 +32,7 @@ module.exports.attributes = (DataTypes) => {
        */
       defaultValue: new Date(0)
     }
-  };
+  }
 }
 
 module.exports.options = {
@@ -33,41 +40,16 @@ module.exports.options = {
   indexes: [{
     type: 'unique',
     /* Name is important for unique index */
-    name: 'user_name_unique',
+    name: 'house_name_unique',
     fields: ['name']
   }],
 
   classMethods: {
     associate: (models) => {
 
-      models.user.belongsToMany(models.character, {
-        as: 'partialities',
-        constraints: false,
-        through:  {
-          model: models.user_characters,
-          scope: {
-            rate: {
-              $gt: 0
-            }
-          }
-        },
-        foreignKey: 'user_id',
-        otherKey: 'character_id'
-      })
-
-      models.user.belongsToMany(models.character, {
-        as: 'pests',
-        constraints: false,
-        through:  {
-          model: models.user_characters,
-          scope: {
-            rate: {
-              $lte: 0
-            }
-          }
-        },
-        foreignKey: 'user_id',
-        otherKey: 'character_id'
+      models.character.belongsTo(models.house, {
+        as: 'seat',
+        constraints: false
       })
     }
   }

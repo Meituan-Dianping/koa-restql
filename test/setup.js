@@ -1,14 +1,19 @@
 'use strict';
 
-const mock   = require('./mock/data');
-const common = require('./lib/common');
-const debug  = common.debug('koa-restql:test:setup');
+const prepare = require('./lib/prepare')
+const debug   = require('debug')('koa-restql:test:setup')
 
-before ('db setup', function (done) {
+before ('database setup', function (done) {
 
-  let sequelize = common.sequelize;
+  let sequelize = prepare.sequelize
 
-  common.loadMockData().then(res => {
-    done();
-  }).catch(done);
+  prepare.loadMockData().then(res => {
+    debug(res);
+    done()
+  }).catch(done)
+
+})
+
+it('test', function () {
+  debug('done');
 })

@@ -16,7 +16,8 @@ const Router    = require('koa-router');
 const mock      = require('../mock/data');
 const methods   = require('../../lib/methods');
 
-const database  = process.env.TEST_DB || "mysql://koa-restql-test:test@localhost/koa-restql-test#UT8";
+const database  = process.env.TEST_DB 
+  || "mysql://koa-restql-test:test@localhost/koa-restql-test#UT8";
 
 const sequelize = new Sequelize(database, {
   logging        : debug,

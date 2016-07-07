@@ -3,6 +3,7 @@
 module.exports.attributes = (DataTypes) => {
 
   return {
+
     id : {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -14,6 +15,18 @@ module.exports.attributes = (DataTypes) => {
       allowNull: false,
       defaultValue: ''
     }, 
+
+    house_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+
+    is_bastard: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
 
     deleted_at : {
       type: DataTypes.DATE,
@@ -33,41 +46,33 @@ module.exports.options = {
   indexes: [{
     type: 'unique',
     /* Name is important for unique index */
-    name: 'user_name_unique',
+    name: 'character_name_unique',
     fields: ['name']
-  }],
+  }, {
+    fields: ['house_id']
+  }, ],
 
   classMethods: {
     associate: (models) => {
 
-      models.user.belongsToMany(models.character, {
-        as: 'partialities',
-        constraints: false,
-        through:  {
-          model: models.user_characters,
-          scope: {
-            rate: {
-              $gt: 0
-            }
-          }
-        },
-        foreignKey: 'user_id',
-        otherKey: 'character_id'
+      models.character.belongsTo(models.house, {
+        as: 'member',
+        constraints: false
       })
 
-      models.user.belongsToMany(models.character, {
-        as: 'pests',
+      models.character.hasOne(models.profile, {
+        as: 'profile',
+        constraints: false
+      })
+
+      models.character.belongsToMany(models.user, {
+        as: 'reviewers',
         constraints: false,
         through:  {
           model: models.user_characters,
-          scope: {
-            rate: {
-              $lte: 0
-            }
-          }
         },
-        foreignKey: 'user_id',
-        otherKey: 'character_id'
+        foreignKey: 'character_id',
+        otherKey: 'user_id'
       })
     }
   }
