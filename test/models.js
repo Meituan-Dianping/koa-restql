@@ -54,7 +54,7 @@ describe ('model routers', function () {
 
     })
 
-    it.only ('should create an user | 201, post', function (done) {
+    it ('should create an user | 201, post', function (done) {
 
       const data = {
         name: 'Li Xin'
@@ -76,6 +76,75 @@ describe ('model routers', function () {
             done();
           }).catch(done);
         })
+    })
+
+    describe ('unique key constraint error', function () {
+
+
+      it ('should get unique index error | 409, post', function (done) {
+
+        const id = 1;
+
+        models.user.findById(id).then(data => {
+
+          data = data.dataValues
+          delete data.id
+          delete data.created_at
+          delete data.updated_at
+          delete data.deleted_at
+
+          server
+            .post(`/user`)
+            .send(data)
+            .expect(409)
+            .end(done)
+        })
+
+      })
+
+      it.only ('should restore an user | 201, post', function (done) {
+
+        const id = 1;
+
+        models.user.findById(id).then(data => {
+          return models.user.destroy({
+            where: {
+              id: data.id
+            }
+          }).then(() => data)
+        }).then(data => {
+
+          data = data.dataValues;
+          delete data.id
+          delete data.created_at
+          delete data.updated_at
+          delete data.deleted_at
+
+          data.email = 'daleoooo.z@gmail.com'
+          debug(data);
+
+          server
+            .post(`/user`)
+            .send(data)
+            .expect(201)
+            .end((err, res) => {
+              if (err) return done(err);
+              let body = res.body;
+              assert(typeof body === 'object');
+              debug(body);
+              assert(body.id);
+              assert(body.name === data.name);
+              assert(body.email === data.email)
+              models.user.findById(body.id).then(user => {
+                assert(user.name === body.name);
+                assert(user.email === body.email);
+                done();
+              }).catch(done);
+            })
+        })
+
+      })
+
     })
 
     it ('should create an user | 201, put', function (done) {
@@ -1094,6 +1163,38 @@ describe ('model routers', function () {
       })    
   })
 
+  it ('should create an array of departments', function (done) {
+
+    let data = [{
+      description : 'MT'
+    }, {
+      description : 'DP'
+    }]
+
+    server
+      .post(`/user/1/departments`)
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        let body = res.body;
+        debug(body);
+        assert(Array.isArray(body));
+        assert(body.length === 2);
+
+        let promises = body.map(department => {
+          assert(department.user_id);
+          return models.department.find({
+            id : department.id,
+          }).then(res => {
+            assert(res);
+          });
+        }) 
+
+        Promise.all(promises).then(() => done());
+      })
+  })
+
   it ('should get an user department', function (done) {
 
     server
@@ -1188,6 +1289,115 @@ describe ('model routers', function () {
           done();
         }).catch (done);
       })
+  })
+
+  it ('should assocition a tag', function (done) {
+
+    let data = {
+      name : 'MIT'
+    }
+
+    let querystring = qs.stringify({
+      _ignoreDuplicates: true
+    })
+
+    models.tag.create(data)
+      .then(tag => {
+        server
+          .post(`/user/1/tags?${querystring}`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(body.id);
+            assert(body.name === tag.name);
+
+            models.user_tags.findOne({
+              where: {
+                user_id : 1,
+                tag_id  : tag.id
+              }
+            }).then(userTag => {
+              assert(userTag);
+              done();
+            })
+          })
+      })
+      .catch(done);
+  })
+
+  it ('should assocition a tag only use id', function (done) {
+
+    let data = {
+      name : 'MIT'
+    }
+
+    models.tag.create(data)
+      .then(tag => {
+        server
+          .post(`/user/1/tags`)
+          .send({ id: tag.id })
+          .expect(201)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(body.id);
+            assert(body.name === tag.name);
+
+            models.user_tags.findOne({
+              where: {
+                user_id : 1,
+                tag_id  : tag.id
+              }
+            }).then(userTag => {
+              assert(userTag);
+              done();
+            })
+          })
+      })
+      .catch(done);
+  })
+
+  it ('should assocition a tags', function (done) {
+
+    let data = [{
+      name : 'MT'
+    }, {
+      name : 'DP'
+    }]
+
+    let querystring = qs.stringify({
+      _ignoreDuplicates: true
+    })
+
+    models.tag.bulkCreate(data)
+      .then(() => {
+        server
+          .post(`/user/1/tags?${querystring}`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(Array.isArray(body));
+            assert(body.length === 2);
+
+            let promises = body.map(tag => {
+              return models.user_tags.find({
+                tag_id  : tag.id,
+                user_id : 1,
+              }).then(userTag => {
+                assert(userTag);
+              });
+            }) 
+
+            Promise.all(promises).then(() => done());
+          })
+      }).catch(done);
   })
 
   it ('should get an user tag', function (done) {
