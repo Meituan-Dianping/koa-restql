@@ -56,12 +56,7 @@ module.exports.options = {
     associate: (models) => {
 
       models.character.belongsTo(models.house, {
-        as: 'member',
-        constraints: false
-      })
-
-      models.character.hasOne(models.profile, {
-        as: 'profile',
+        as: 'house',
         constraints: false
       })
 

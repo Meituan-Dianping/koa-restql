@@ -47,8 +47,13 @@ module.exports.options = {
   classMethods: {
     associate: (models) => {
 
-      models.character.belongsTo(models.house, {
+      models.house.hasOne(models.seat, {
         as: 'seat',
+        constraints: false
+      })
+
+      models.house.hasMany(models.character, {
+        as: 'members',
         constraints: false
       })
     }
