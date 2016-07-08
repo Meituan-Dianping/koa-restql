@@ -3,19 +3,25 @@
 module.exports.attributes = (DataTypes) => {
 
   return {
-    id : {
+    id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },   
 
-    name : {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: ''
     }, 
 
-    deleted_at : {
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: ''
+    }, 
+
+    deleted_at: {
       type: DataTypes.DATE,
       allowNull: false,
       /**
@@ -25,7 +31,7 @@ module.exports.attributes = (DataTypes) => {
        */
       defaultValue: new Date(0)
     }
-  };
+  }
 }
 
 module.exports.options = {
