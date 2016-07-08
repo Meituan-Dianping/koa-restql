@@ -1,54 +1,120 @@
 'use strict'
 
-const RestQL = require('../lib/RestQL');
-const common = require('./lib/common');
+const qs      = require('qs')
+const koa     = require('koa')
+const http    = require('http')
+const uuid    = require('node-uuid')
+const assert  = require('assert')
+const request = require('supertest')
+const debug   = require('debug')('koa-restql:test:models')
 
-const qs      = common.qs;
-const koa     = common.koa;
-const util    = common.util;
-const http    = common.http;
-const uuid    = common.uuid;
-const Router  = common.Router;
-const assert  = common.assert;
-const request = common.request;
-const models  = common.sequelize.models;
-const debug   = common.debug('koa-restql:test:models');
+const prepare = require('./lib/prepare')
+const RestQL  = require('../lib/RestQL')
 
-describe ('middlewares', function () {
-  let server = null;
+const models  = prepare.sequelize.models
+
+describe ('model routers', function () {
+
+  let server
 
   before (function () {
 
     let app = koa()
-      , restql = new RestQL(models);
+      , restql = new RestQL(models)
 
-    app.use(restql.routes());
-    server = request(http.createServer(app.callback()));
+    app.use(restql.routes())
+    server = request(http.createServer(app.callback()))
   })
 
   beforeEach (function (done) {
 
-    debug('reset db');
-    common.loadMockData().then(() => {
-      done();
-    }).catch(err => {
-      done(err);
-    });
+    debug('reset db')
+    prepare.loadMockData().then(() => {
+      done()
+    }).catch(done)  
   })
 
-  it ('should get user array', function (done) {
+  describe ('user', function () {
 
-    server
-      .get('/user')
-      .expect(200)
-      .end((err, res) => {
-        if (err) return done(err);
-        let body = res.body;
-        assert(Array.isArray(body));
-        debug(body);
-        assert(body.length === 2);
-        done();
-      })
+    it ('should get an array | 200', function (done) {
+
+      server
+        .get('/user')
+        .expect(200)
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          debug(body)
+          assert(body.length === 2)
+          done();
+
+        })
+
+    })
+
+    it.only ('should create an user | 201, post', function (done) {
+
+      const data = {
+        name: 'Li Xin'
+      }
+
+      server
+        .post(`/user`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(typeof body === 'object');
+          debug(body);
+          assert(body.id);
+          assert(body.name === data.name);
+          models.user.findById(body.id).then(user => {
+            assert(user.name === body.name);
+            done();
+          }).catch(done);
+        })
+    })
+
+    it ('should create an user | 201, put', function (done) {
+
+      const id = 1;
+
+      server
+        .get(`/user/${id}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(typeof body === 'object');
+          debug(body);
+          assert(body.id === id);
+          done();
+        })
+    })
+
+    it ('should get an object | 200', function (done) {
+
+      const id = 1;
+
+      server
+        .get(`/user/${id}`)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(typeof body === 'object');
+          debug(body);
+          assert(body.id === id);
+          done();
+        })
+    })
+
+
+
+
   })
 
   //it ('should get user array and id > 1', function (done) {
@@ -270,7 +336,7 @@ describe ('middlewares', function () {
       })
   })
 
-  it.only ('should return 400 when create users use put', function (done) {
+  it ('should return 400 when create users use put', function (done) {
 
     const data = [{
       email : 'sam@gmail.com'

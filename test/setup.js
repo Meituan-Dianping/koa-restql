@@ -13,7 +13,3 @@ before ('database setup', function (done) {
   }).catch(done)
 
 })
-
-it('test', function () {
-  debug('done');
-})

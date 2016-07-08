@@ -51,10 +51,14 @@ const loadMockModels = (modelsPath) => {
         , name  = filename.match(validNameRegex)[1]
 
       let {
-        options = {}, attributes = {}
-      } = model;
+        options = {}, attributes
+      }= model;
 
-      sequelize.define(name, attributes, options)
+      if ('function' !== typeof attributes) {
+        throw new Error(`model ${name}'s attributes is not found`);
+      }
+
+      sequelize.define(name, attributes(Sequelize), options)
     }       
   })
 }
@@ -83,16 +87,18 @@ const loadMockData = () => {
 
 loadMockModels('test/mock/models')
 
-// const models = sequelize.models;
-// Object.keys(models).forEach(key => {
-// 
-//   let model = models[key]
-// 
-//   if ('associate' in model) {
-//     model.associate(models)
-//   }
-// })
+const models = sequelize.models;
+Object.keys(models).forEach(key => {
 
+  let model = models[key]
+
+  if ('associate' in model) {
+    model.associate(models)
+  }
+
+  debug(`model: ${model.name}, 
+    associations: [${Object.keys(model.associations).join()}]`)
+})
 
 module.exports = {
   sequelize, loadMockData
