@@ -13,21 +13,35 @@ const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
 
-const validateUser = (user, expect, done) => {
+const assertObject = (data, expect) => {
 
-  assert(user)
+  assert(data)
+  assert(expect)
 
   const keys = Object.keys(expect)
   keys.forEach(key => {
-    assert(user[key])
-    assert(user[key] === expect[key])
+    assert(data[key] !== undefined)
+    assert(data[key] === expect[key])
   })
 
-  return models.user.findById(user.id).then(data => {
-    keys.forEach(key => {
-      assert(data[key])
-      assert(data[key] === expect[key])
-    })
+}
+
+const assertModelById = (model, id, expect, done) => {
+  
+  assert(id)
+  return model.findById(id).then(res => {
+    assertObject(res.dataValues, expect)
+    if (done) done()
+  })
+
+}
+
+const assertUser = (user, expect, done) => {
+
+  assertObject(user, expect)
+
+  return models.user.findById(user.id).then(res => {
+    assertObject(res.dataValues, expect)
     if (done) done()
   })
 
@@ -92,7 +106,7 @@ describe ('model routers', function () {
           debug(body);
 
           data.id = body.id;
-          validateUser(body, data, done)
+          assertUser(body, data, done)
         })
     })
 
@@ -115,7 +129,7 @@ describe ('model routers', function () {
           debug(body)
 
           let promises = 
-          body.map((user, index) => validateUser(user, data[index]))
+          body.map((user, index) => assertUser(user, data[index]))
 
           Promise.all(promises)
             .then(() => done())
@@ -141,7 +155,7 @@ describe ('model routers', function () {
           debug(body);
 
           data.id = body.id;
-          validateUser(body, data, done).catch(done)
+          assertUser(body, data, done).catch(done)
         })
     })
 
@@ -169,7 +183,7 @@ describe ('model routers', function () {
             debug(body);
 
             data.id = body.id;
-            validateUser(body, data, done)
+            assertUser(body, data, done)
           })
 
       })
@@ -195,7 +209,7 @@ describe ('model routers', function () {
           debug(body)
 
           let promises = 
-          body.map((user, index) => validateUser(user, data[index]))
+          body.map((user, index) => assertUser(user, data[index]))
 
           Promise.all(promises)
             .then(() => done())
@@ -333,7 +347,7 @@ describe ('model routers', function () {
               assert(typeof body === 'object');
               debug(body);
 
-              validateUser(body, data, done).catch(done)
+              assertUser(body, data, done).catch(done)
             })
         })
 
@@ -385,7 +399,7 @@ describe ('model routers', function () {
               debug(body)
 
               let promises = 
-              data.map((row, index) => validateUser(body[index], row))
+              data.map((row, index) => assertUser(body[index], row))
 
               Promise.all(promises)
                 .then(() => done())
@@ -432,7 +446,7 @@ describe ('model routers', function () {
           let body = res.body
           assert(typeof body === 'object')
           debug(body)
-          validateUser(body, data, done).catch(done)
+          assertUser(body, data, done).catch(done)
         })
     })
 
@@ -453,6 +467,168 @@ describe ('model routers', function () {
           }).catch(done)
 
         })
+
+    })
+
+  })
+
+  describe ('user_characters', function () {
+
+    describe ('unique key constraint error', function () {
+
+      it ('should return 409 | post /user_characters, object body', function (done) {
+
+        const id = 1
+
+        models.user_characters.findById(id).then(data => {
+
+          data = data.dataValues
+          delete data.id
+          delete data.created_at
+          delete data.updated_at
+          delete data.deleted_at
+
+          server
+            .post(`/user_characters`)
+            .send(data)
+            .expect(409)
+            .end(done)
+        })
+
+      })
+
+      it ('should return 409 | post /user_characters, array body', function (done) {
+
+        const ids = [1, 2]
+
+        models.user_characters.findAll({
+          where: {
+            id: ids
+          }
+        }).then(data => {
+
+          data = data.map(row => {
+            row = row.dataValues
+            delete row.id
+            delete row.created_at
+            delete row.updated_at
+            delete row.deleted_at
+            return row
+          })
+
+          server
+            .post(`/user_characters`)
+            .send(data)
+            .expect(409)
+            .end(done)
+        })
+
+      })
+
+      it ('should return 201 | post /user_characters, object body', function (done) {
+
+        const id = 2
+
+        models.user_characters.findById(id).then(data => {
+          return models.user_characters.destroy({
+            where: {
+              id: data.id
+            }
+          }).then(() => {
+            return models.user_characters.findById(id)
+          }).then(res => {
+            assert(!res)
+            return data
+          })
+        }).then(data => {
+
+          data = data.dataValues;
+          delete data.created_at
+          delete data.updated_at
+          delete data.deleted_at
+
+          data.rate = 0
+          debug(data);
+
+          server
+            .post(`/user_characters`)
+            .send(data)
+            .expect(201)
+            .end((err, res) => {
+              if (err) return done(err);
+              let body = res.body;
+              assert(typeof body === 'object');
+              debug(body);
+
+              assertObject(body, data)
+              assertModelById(models.user_characters, id, data, done)
+              .catch(done)
+            })
+        })
+
+      })
+
+      it.only ('should return 201 | post /user_characters, array body', function (done) {
+
+        const ids = [2]
+
+        models.user_characters.findAll({
+          where: {
+            id: ids
+          }     
+        }).then(data => {
+          return models.user_characters.destroy({
+            where: {
+              id: ids
+            }
+          }).then(() => {
+            return models.user_characters.findAll({
+              where: {
+                id: ids
+              }
+            })
+          }).then(res => {
+            assert(!res.length)
+            return data
+          })
+        }).then(data => {
+
+          data = data.map(row => {
+            row = row.dataValues
+            row.rate = 0
+            delete row.id
+            delete row.created_at
+            delete row.updated_at
+            delete row.deleted_at
+            return row
+          })
+
+          debug(data)
+
+          server
+            .post(`/user_characters`)
+            .send(data)
+            .expect(201)
+            .end((err, res) => {
+              if (err) return done(err);
+              let body = res.body;
+              assert(Array.isArray(body))
+              debug(body)
+
+              const model = models.user_characters
+
+              let promises = data.map((row, index) => {
+                assertObject(body[index], row)
+                return assertModelById(model, body[index].id, row)
+              })
+
+              Promise.all(promises)
+                .then(() => done())
+                .catch(done)
+            })
+        })
+
+      })
 
     })
 
