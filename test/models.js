@@ -228,6 +228,25 @@ describe ('model routers', function () {
 
     })
 
+    it ('should return 204 | delete /user, no query, delete nothing', function (done) {
+
+      models.user.count().then(count => {
+        server
+          .del(`/user`)
+          .expect(204)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            models.user.count().then(newCount => {
+              assert(count === newCount)
+              done()
+            }).catch(done)
+
+          })
+        })
+
+    })
+
     describe ('unique key constraint error', function () {
 
       it ('should return 409 | post /user, object body', function (done) {
