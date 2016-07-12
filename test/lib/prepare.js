@@ -28,7 +28,7 @@ const sequelize = new Sequelize(database, {
   },
 })
 
-const loadMockModels = (modelsPath) => {
+const loadMockModels = (modelsPath, schema) => {
 
   fs.readdirSync(modelsPath).forEach(filename => {
 
@@ -44,7 +44,7 @@ const loadMockModels = (modelsPath) => {
     // load model recursively
     if (isDirectory) {
 
-      loadMockModels(modelPath)
+      loadMockModels(modelPath, filename)
 
     } else {
       let model = require(modelPath)
@@ -53,6 +53,10 @@ const loadMockModels = (modelsPath) => {
       let {
         options = {}, attributes
       }= model;
+
+      if (schema) {
+        options.schema = schema
+      }
 
       if ('function' !== typeof attributes) {
         throw new Error(`model ${name}'s attributes is not found`);
