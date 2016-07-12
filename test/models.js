@@ -13,6 +13,26 @@ const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
 
+const validateUser = (user, expect, done) => {
+
+  assert(user)
+
+  const keys = Object.keys(expect)
+  keys.forEach(key => {
+    assert(user[key])
+    assert(user[key] === expect[key])
+  })
+
+  return models.user.findById(user.id).then(data => {
+    keys.forEach(key => {
+      assert(data[key])
+      assert(data[key] === expect[key])
+    })
+    if (done) done()
+  })
+
+}
+
 describe ('model routers', function () {
 
   let server
@@ -57,7 +77,8 @@ describe ('model routers', function () {
     it ('should create an user | 201, post', function (done) {
 
       const data = {
-        name: 'Li Xin'
+        name     : 'Li Xin',
+        nickname : 'xt'
       }
 
       server
@@ -69,21 +90,44 @@ describe ('model routers', function () {
           let body = res.body;
           assert(typeof body === 'object');
           debug(body);
-          assert(body.id);
-          assert(body.name === data.name);
-          models.user.findById(body.id).then(user => {
-            assert(user.name === body.name);
-            done();
-          }).catch(done);
+
+          data.id = body.id;
+          validateUser(body, data, done)
+        })
+    })
+
+    it ('should create an array of users | 201, post', function (done) {
+
+      const data = [{
+        name: 'Li Xin'
+      }, {
+        name: 'yadan'
+      }]
+
+      server
+        .post(`/user`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          debug(body)
+
+          let promises = 
+          body.map((user, index) => validateUser(user, data[index]))
+
+          Promise.all(promises)
+            .then(() => done())
+            .catch(done)
         })
     })
 
     describe ('unique key constraint error', function () {
 
+      it ('should get unique index error | 409, post object', function (done) {
 
-      it ('should get unique index error | 409, post', function (done) {
-
-        const id = 1;
+        const id = 1
 
         models.user.findById(id).then(data => {
 
@@ -102,25 +146,57 @@ describe ('model routers', function () {
 
       })
 
-      it.only ('should restore an user | 201, post', function (done) {
+      it ('should get unique index error | 409, post array', function (done) {
 
-        const id = 1;
+        const ids = [1, 2]
+
+        models.user.findAll({
+          where: {
+            id: ids
+          }
+        }).then(data => {
+
+          data = data.map(row => {
+            row = row.dataValues
+            delete row.id
+            delete row.created_at
+            delete row.updated_at
+            delete row.deleted_at
+            return row
+          })
+
+          server
+            .post(`/user`)
+            .send(data)
+            .expect(409)
+            .end(done)
+        })
+
+      })
+
+      it ('should restore an user | 201, post object', function (done) {
+
+        const id = 2
 
         models.user.findById(id).then(data => {
           return models.user.destroy({
             where: {
               id: data.id
             }
-          }).then(() => data)
+          }).then(() => {
+            return models.user.findById(id)
+          }).then(res => {
+            assert(!res)
+            return data
+          })
         }).then(data => {
 
           data = data.dataValues;
-          delete data.id
           delete data.created_at
           delete data.updated_at
           delete data.deleted_at
 
-          data.email = 'daleoooo.z@gmail.com'
+          data.nickname = 'daleoooo'
           debug(data);
 
           server
@@ -132,14 +208,64 @@ describe ('model routers', function () {
               let body = res.body;
               assert(typeof body === 'object');
               debug(body);
-              assert(body.id);
-              assert(body.name === data.name);
-              assert(body.email === data.email)
-              models.user.findById(body.id).then(user => {
-                assert(user.name === body.name);
-                assert(user.email === body.email);
-                done();
-              }).catch(done);
+
+              validateUser(body, data, done).catch(done)
+            })
+        })
+
+      })
+
+      it.only ('should restore an user | 201, post array', function (done) {
+
+        const ids = [1, 2]
+
+        models.user.findAll({
+          where: {
+            id: ids
+          }     
+        }).then(data => {
+          return models.user.destroy({
+            where: {
+              id: ids
+            }
+          }).then(() => {
+            return models.user.findAll({
+              where: {
+                id: ids
+              }
+            })
+          }).then(res => {
+            assert(!res.length)
+            return data
+          })
+        }).then(data => {
+
+          data = data.map(row => {
+            row = row.dataValues
+            row.nickname = uuid()
+            delete row.id
+            delete row.created_at
+            delete row.updated_at
+            delete row.deleted_at
+            return row
+          })
+
+          server
+            .post(`/user`)
+            .send(data)
+            .expect(201)
+            .end((err, res) => {
+              if (err) return done(err);
+              let body = res.body;
+              assert(Array.isArray(body))
+              debug(body)
+
+              let promises = 
+              data.map((row, index) => validateUser(body[index], row))
+
+              Promise.all(promises)
+                .then(() => done())
+                .catch(done)
             })
         })
 

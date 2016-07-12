@@ -24,8 +24,8 @@ module.exports = {
   ],
 
   user: [
-    { id: 1, name: 'Dale',    email: 'dale@gmail.com' },
-    { id: 2, name: 'Jocelyn', email: 'jocelyn@mail.com' }
+    { id: 1, name: 'Dale',    nickname: 'cg' },
+    { id: 2, name: 'Jocelyn', nickname: 'mm' }
   ],
 
   user_characters: [
