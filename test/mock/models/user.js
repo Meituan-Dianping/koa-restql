@@ -15,7 +15,7 @@ module.exports.attributes = (DataTypes) => {
       defaultValue: ''
     }, 
 
-    email: {
+    nickname: {
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: ''
