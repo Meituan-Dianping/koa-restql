@@ -36,17 +36,6 @@ const assertModelById = (model, id, expect, done) => {
 
 }
 
-const assertUser = (user, expect, done) => {
-
-  assertObject(user, expect)
-
-  return models.user.findById(user.id).then(res => {
-    assertObject(res.dataValues, expect)
-    if (done) done()
-  })
-
-}
-
 describe ('model routers', function () {
 
   let server
@@ -69,6 +58,8 @@ describe ('model routers', function () {
   })
 
   describe.only ('user', function () {
+
+    const model = models.user
 
     it ('should return 200 | get /user', function (done) {
 
@@ -105,8 +96,8 @@ describe ('model routers', function () {
           assert(typeof body === 'object');
           debug(body);
 
-          data.id = body.id;
-          assertUser(body, data, done)
+          assertObject(body, data)
+          assertModelById(model, body.id, data, done).catch(done)
         })
     })
 
@@ -128,8 +119,10 @@ describe ('model routers', function () {
           assert(Array.isArray(body))
           debug(body)
 
-          let promises = 
-          body.map((user, index) => assertUser(user, data[index]))
+          let promises = data.map((row, index) => {
+            assertObject(body[index], row) 
+            return assertModelById(model, body[index].id, row)
+          })
 
           Promise.all(promises)
             .then(() => done())
@@ -154,8 +147,8 @@ describe ('model routers', function () {
           assert(typeof body === 'object');
           debug(body);
 
-          data.id = body.id;
-          assertUser(body, data, done).catch(done)
+          assertObject(body, data) 
+          assertModelById(model, body.id, data, done).catch(done)
         })
     })
 
@@ -182,8 +175,8 @@ describe ('model routers', function () {
             assert(typeof body === 'object');
             debug(body);
 
-            data.id = body.id;
-            assertUser(body, data, done)
+            assertObject(body, data) 
+            assertModelById(model, body.id, data, done).catch(done)
           })
 
       })
@@ -208,8 +201,10 @@ describe ('model routers', function () {
           assert(Array.isArray(body))
           debug(body)
 
-          let promises = 
-          body.map((user, index) => assertUser(user, data[index]))
+          let promises = data.map((row, index) => {
+            assertObject(body[index], row) 
+            return assertModelById(model, body[index].id, row)
+          })
 
           Promise.all(promises)
             .then(() => done())
@@ -347,7 +342,8 @@ describe ('model routers', function () {
               assert(typeof body === 'object');
               debug(body);
 
-              assertUser(body, data, done).catch(done)
+              assertObject(body, data)
+              assertModelById(model, body.id, data, done).catch(done)
             })
         })
 
@@ -398,8 +394,10 @@ describe ('model routers', function () {
               assert(Array.isArray(body))
               debug(body)
 
-              let promises = 
-              data.map((row, index) => assertUser(body[index], row))
+              let promises = data.map((row, index) => {
+                assertObject(body[index], row) 
+                return assertModelById(model, body[index].id, row)
+              })
 
               Promise.all(promises)
                 .then(() => done())
@@ -446,7 +444,9 @@ describe ('model routers', function () {
           let body = res.body
           assert(typeof body === 'object')
           debug(body)
-          assertUser(body, data, done).catch(done)
+
+          assertObject(body, data)
+          assertModelById(model, body.id, data, done).catch(done)
         })
     })
 
@@ -472,7 +472,9 @@ describe ('model routers', function () {
 
   })
 
-  describe ('user_characters', function () {
+  describe.only ('user_characters', function () {
+
+    const model = models.user_characters
 
     describe ('unique key constraint error', function () {
 
@@ -480,7 +482,7 @@ describe ('model routers', function () {
 
         const id = 1
 
-        models.user_characters.findById(id).then(data => {
+        model.findById(id).then(data => {
 
           data = data.dataValues
           delete data.id
@@ -501,7 +503,7 @@ describe ('model routers', function () {
 
         const ids = [1, 2]
 
-        models.user_characters.findAll({
+        model.findAll({
           where: {
             id: ids
           }
@@ -529,13 +531,13 @@ describe ('model routers', function () {
 
         const id = 2
 
-        models.user_characters.findById(id).then(data => {
-          return models.user_characters.destroy({
+        model.findById(id).then(data => {
+          return model.destroy({
             where: {
               id: data.id
             }
           }).then(() => {
-            return models.user_characters.findById(id)
+            return model.findById(id)
           }).then(res => {
             assert(!res)
             return data
@@ -561,28 +563,28 @@ describe ('model routers', function () {
               debug(body);
 
               assertObject(body, data)
-              assertModelById(models.user_characters, id, data, done)
+              assertModelById(model, id, data, done)
               .catch(done)
             })
         })
 
       })
 
-      it.only ('should return 201 | post /user_characters, array body', function (done) {
+      it ('should return 201 | post /user_characters, array body', function (done) {
 
         const ids = [2]
 
-        models.user_characters.findAll({
+        model.findAll({
           where: {
             id: ids
           }     
         }).then(data => {
-          return models.user_characters.destroy({
+          return model.destroy({
             where: {
               id: ids
             }
           }).then(() => {
-            return models.user_characters.findAll({
+            return model.findAll({
               where: {
                 id: ids
               }
@@ -614,8 +616,6 @@ describe ('model routers', function () {
               let body = res.body;
               assert(Array.isArray(body))
               debug(body)
-
-              const model = models.user_characters
 
               let promises = data.map((row, index) => {
                 assertObject(body[index], row)
