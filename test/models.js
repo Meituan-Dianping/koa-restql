@@ -54,9 +54,9 @@ describe ('model routers', function () {
     }).catch(done)  
   })
 
-  describe ('user', function () {
+  describe.only ('user', function () {
 
-    it ('should get an array | 200', function (done) {
+    it ('should return 200 | get /user', function (done) {
 
       server
         .get('/user')
@@ -74,7 +74,7 @@ describe ('model routers', function () {
 
     })
 
-    it ('should create an user | 201, post', function (done) {
+    it ('should return 201 | post /user, object body', function (done) {
 
       const data = {
         name     : 'Li Xin',
@@ -96,7 +96,7 @@ describe ('model routers', function () {
         })
     })
 
-    it ('should create an array of users | 201, post', function (done) {
+    it ('should return 201 | post /user, array body', function (done) {
 
       const data = [{
         name: 'Li Xin'
@@ -123,9 +123,114 @@ describe ('model routers', function () {
         })
     })
 
+    it ('should return 201 | put /user, object body', function (done) {
+
+      const data = {
+        name     : 'Li Xin',
+        nickname : 'xt'
+      }
+
+      server
+        .put(`/user`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err);
+          let body = res.body;
+          assert(typeof body === 'object');
+          debug(body);
+
+          data.id = body.id;
+          validateUser(body, data, done).catch(done)
+        })
+    })
+
+    it ('should return 200 | put /user, object body', function (done) {
+
+      const id = 2
+
+      models.user.findById(id).then(data => {
+
+        data = data.dataValues
+        delete data.created_at
+        delete data.updated_at
+        delete data.deleted_at
+
+        data.nickname = uuid()
+
+        server
+          .put(`/user`)
+          .send(data)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            assert(typeof body === 'object');
+            debug(body);
+
+            data.id = body.id;
+            validateUser(body, data, done)
+          })
+
+      })
+
+    })
+
+    it ('should return 201 | put /user, array body', function (done) {
+
+      const data = [{
+        name: 'Li Xin'
+      }, {
+        name: 'yadan'
+      }]
+
+      server
+        .put(`/user`)
+        .send(data)
+        .expect(200)
+        .end((err, res) => {
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          debug(body)
+
+          let promises = 
+          body.map((user, index) => validateUser(user, data[index]))
+
+          Promise.all(promises)
+            .then(() => done())
+            .catch(done)
+        })
+    })
+
+    it ('should return 204 | delete /user', function (done) {
+
+      const where = {
+        $or: [{ id: 1 }, { id: 2 }]
+      }
+
+      const querystring = qs.stringify(where)
+
+      server
+        .del(`/user?${querystring}`)
+        .expect(204)
+        .end((err, res) => {
+
+          if (err) return done(err)
+          models.user.findAll({
+            where
+          }).then(data => {
+            assert(!data.length)
+            done()
+          }).catch(done)
+
+        })
+
+    })
+
     describe ('unique key constraint error', function () {
 
-      it ('should get unique index error | 409, post object', function (done) {
+      it ('should return 409 | post /user, object body', function (done) {
 
         const id = 1
 
@@ -146,7 +251,7 @@ describe ('model routers', function () {
 
       })
 
-      it ('should get unique index error | 409, post array', function (done) {
+      it ('should return 409 | post /user, array body', function (done) {
 
         const ids = [1, 2]
 
@@ -174,7 +279,7 @@ describe ('model routers', function () {
 
       })
 
-      it ('should restore an user | 201, post object', function (done) {
+      it ('should return 201 | post /user, object body', function (done) {
 
         const id = 2
 
@@ -196,7 +301,7 @@ describe ('model routers', function () {
           delete data.updated_at
           delete data.deleted_at
 
-          data.nickname = 'daleoooo'
+          data.nickname = uuid()
           debug(data);
 
           server
@@ -215,9 +320,9 @@ describe ('model routers', function () {
 
       })
 
-      it.only ('should restore an user | 201, post array', function (done) {
+      it ('should return 201 | post /user, array body', function (done) {
 
-        const ids = [1, 2]
+        const ids = [2]
 
         models.user.findAll({
           where: {
@@ -273,7 +378,7 @@ describe ('model routers', function () {
 
     })
 
-    it ('should create an user | 201, put', function (done) {
+    it ('should return 200 | get /user/:id', function (done) {
 
       const id = 1;
 
@@ -290,25 +395,47 @@ describe ('model routers', function () {
         })
     })
 
-    it ('should get an object | 200', function (done) {
+    it ('should return 200 | put /user/:id', function (done) {
 
-      const id = 1;
+      const id = 1
+
+      const data = {
+        id: id,
+        nickname: uuid()
+      }
 
       server
-        .get(`/user/${id}`)
+        .put(`/user/${id}`)
+        .send(data)
         .expect(200)
         .end((err, res) => {
-          if (err) return done(err);
-          let body = res.body;
-          assert(typeof body === 'object');
-          debug(body);
-          assert(body.id === id);
-          done();
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
+          validateUser(body, data, done).catch(done)
         })
     })
 
+    it ('should return 204 | delete /user/:id', function (done) {
 
+      const id = 2
 
+      server
+        .del(`/user/${id}`)
+        .expect(204)
+        .end((err, res) => {
+
+          if (err) return done(err)
+
+          models.user.findById(id).then(data => {
+            assert(!data)
+            done()
+          }).catch(done)
+
+        })
+
+    })
 
   })
 
