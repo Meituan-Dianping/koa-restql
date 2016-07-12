@@ -24,6 +24,17 @@ module.exports.attributes = (DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0
+    },
+
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      /**
+       * if this type is DATE,
+       * defaultValue must be a Date, 
+       * otherwise paranoid is useless
+       */
+      defaultValue: new Date(0)
     }
   }
 }
