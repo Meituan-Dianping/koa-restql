@@ -472,7 +472,7 @@ describe ('model routers', function () {
 
   })
 
-  describe.only ('user_characters', function () {
+  describe.only ('user_characters | with multi-field unique index', function () {
 
     const model = models.user_characters
 
@@ -629,6 +629,33 @@ describe ('model routers', function () {
         })
 
       })
+
+    })
+
+  })
+
+  describe.only ('characters | with schema', function () {
+
+    const model = models.character
+
+    it ('should return 200 | get /gameofthrones/character', function (done) {
+
+      model.count().then(count => {
+
+        server
+          .get('/gameofthrones/character')
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            assert(body.length === count)
+            done();
+
+          })
+        }).catch(done)
 
     })
 
