@@ -8,33 +8,11 @@ const assert  = require('assert')
 const request = require('supertest')
 const debug   = require('debug')('koa-restql:test:models')
 
+const test    = require('./lib/test')
 const prepare = require('./lib/prepare')
 const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
-
-const assertObject = (data, expect) => {
-
-  assert(data)
-  assert(expect)
-
-  const keys = Object.keys(expect)
-  keys.forEach(key => {
-    assert(data[key] !== undefined)
-    assert(data[key] === expect[key])
-  })
-
-}
-
-const assertModelById = (model, id, expect, done) => {
-  
-  assert(id)
-  return model.findById(id).then(res => {
-    assertObject(res.dataValues, expect)
-    if (done) done()
-  })
-
-}
 
 describe ('model routers', function () {
 
@@ -96,8 +74,8 @@ describe ('model routers', function () {
           assert(typeof body === 'object');
           debug(body);
 
-          assertObject(body, data)
-          assertModelById(model, body.id, data, done).catch(done)
+          test.assertObject(body, data)
+          test.assertModelById(model, body.id, data, done).catch(done)
         })
     })
 
@@ -120,8 +98,8 @@ describe ('model routers', function () {
           debug(body)
 
           let promises = data.map((row, index) => {
-            assertObject(body[index], row) 
-            return assertModelById(model, body[index].id, row)
+            test.assertObject(body[index], row) 
+            return test.assertModelById(model, body[index].id, row)
           })
 
           Promise.all(promises)
@@ -147,8 +125,8 @@ describe ('model routers', function () {
           assert(typeof body === 'object');
           debug(body);
 
-          assertObject(body, data) 
-          assertModelById(model, body.id, data, done).catch(done)
+          test.assertObject(body, data) 
+          test.assertModelById(model, body.id, data, done).catch(done)
         })
     })
 
@@ -175,8 +153,8 @@ describe ('model routers', function () {
             assert(typeof body === 'object');
             debug(body);
 
-            assertObject(body, data) 
-            assertModelById(model, body.id, data, done).catch(done)
+            test.assertObject(body, data) 
+            test.assertModelById(model, body.id, data, done).catch(done)
           })
 
       })
@@ -202,8 +180,8 @@ describe ('model routers', function () {
           debug(body)
 
           let promises = data.map((row, index) => {
-            assertObject(body[index], row) 
-            return assertModelById(model, body[index].id, row)
+            test.assertObject(body[index], row) 
+            return test.assertModelById(model, body[index].id, row)
           })
 
           Promise.all(promises)
@@ -342,8 +320,8 @@ describe ('model routers', function () {
               assert(typeof body === 'object');
               debug(body);
 
-              assertObject(body, data)
-              assertModelById(model, body.id, data, done).catch(done)
+              test.assertObject(body, data)
+              test.assertModelById(model, body.id, data, done).catch(done)
             })
         })
 
@@ -395,8 +373,8 @@ describe ('model routers', function () {
               debug(body)
 
               let promises = data.map((row, index) => {
-                assertObject(body[index], row) 
-                return assertModelById(model, body[index].id, row)
+                test.assertObject(body[index], row) 
+                return test.assertModelById(model, body[index].id, row)
               })
 
               Promise.all(promises)
@@ -445,8 +423,8 @@ describe ('model routers', function () {
           assert(typeof body === 'object')
           debug(body)
 
-          assertObject(body, data)
-          assertModelById(model, body.id, data, done).catch(done)
+          test.assertObject(body, data)
+          test.assertModelById(model, body.id, data, done).catch(done)
         })
     })
 
@@ -562,8 +540,8 @@ describe ('model routers', function () {
               assert(typeof body === 'object');
               debug(body);
 
-              assertObject(body, data)
-              assertModelById(model, id, data, done)
+              test.assertObject(body, data)
+              test.assertModelById(model, id, data, done)
               .catch(done)
             })
         })
@@ -618,8 +596,8 @@ describe ('model routers', function () {
               debug(body)
 
               let promises = data.map((row, index) => {
-                assertObject(body[index], row)
-                return assertModelById(model, body[index].id, row)
+                test.assertObject(body[index], row)
+                return test.assertModelById(model, body[index].id, row)
               })
 
               Promise.all(promises)
