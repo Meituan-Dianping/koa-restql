@@ -44,7 +44,7 @@ module.exports.options = {
     fields: ['name']
   }, {
     type: 'unique',
-    name: 'set_house_id_unique',
+    name: 'seat_house_id_unique',
     fields: ['house_id']
   }],
 
