@@ -410,36 +410,6 @@ describe ('model association routers', function () {
 
       }).catch(done)
 
-      it ('should return 201 | post /house/:id/members, object body', function (done) {
-
-        const id = 1
-        const data = {
-          name: 'Sansa'  
-        }
-
-        model.findById(id).then(house => {
-
-          server
-            .post(`/gameofthrones/house/${id}/members`)
-            .send(data)
-            .expect(201)
-            .end((err, res) => {
-
-              if (err) return done(err)
-              let body = res.body
-              assert('object' === typeof body)
-              debug(body)
-              assert(body.id)
-              assert(body.house_id === house.id)
-              test.assertObject(body, data)
-              test.assertModelById(association, body.id, data, done)
-
-            })
-
-        }).catch(done)
-
-      })
-
     })
 
     describe ('unique key constraint error', function () {
@@ -471,7 +441,7 @@ describe ('model association routers', function () {
       
       })
 
-      it.only ('should return 409 | post /house/:id/members, array body', function (done) {
+      it ('should return 409 | post /house/:id/members, array body', function (done) {
 
         const id = 1
 
@@ -562,7 +532,7 @@ describe ('model association routers', function () {
 
       })
 
-      it.only ('should return 201 | post /house/:id/members, array body', function (done) {
+      it ('should return 201 | post /house/:id/members, array body', function (done) {
 
         const id = 1
 
@@ -618,6 +588,171 @@ describe ('model association routers', function () {
 
       })
 
+    })
+
+    it ('should return 201 | put /house/:id/members, object body', function (done) {
+
+      const id = 1
+      const data = {
+        name: 'Sansa'  
+      }
+
+      model.findById(id).then(house => {
+
+        server
+          .put(`/gameofthrones/house/${id}/members`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.id)
+            assert(body.house_id === house.id)
+            test.assertObject(body, data)
+            test.assertModelById(association, body.id, data, done)
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 200 | put /house/:id/members, object body', function (done) {
+
+      const id = 1
+      const data = {
+        name: 'Jon',
+        is_bastard: false
+      }
+
+      model.findById(id).then(house => {
+
+        server
+          .put(`/gameofthrones/house/${id}/members`)
+          .send(data)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.id)
+            assert(body.house_id === house.id)
+            test.assertObject(body, data)
+            test.assertModelById(association, body.id, data, done)
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 201 | post /house/:id/members, array body', function (done) {
+
+      const id = 1
+      const data = [{
+        name: 'Sansa'  
+      }, {
+        name: 'Bran'
+      }, {
+        name: 'Jon',
+        is_bastard: false
+      }]
+
+      model.findById(id).then(house => {
+
+        server
+          .put(`/gameofthrones/house/${id}/members`)
+          .send(data)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+
+            assert(body.length === data.length)
+
+            const promises = body.map((character, index) => {
+              assert(character.id)
+              assert(character.house_id === house.id)
+              test.assertObject(character, data[index])
+              return test.assertModelById(association, 
+                character.id, data[index])
+            })
+
+            Promise.all(promises).then(() => done())
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 200 | put /house/:id/members/:associationId, object body', function (done) {
+
+      const id = 1
+      const data = {
+        name: 'Jon',
+        is_bastard: false
+      }
+
+      association.find({
+        where: {
+          house_id: id
+        }
+      }).then(character => {
+
+          server
+            .put(`/gameofthrones/house/${id}/members/${character.id}`)
+            .send(data)
+            .expect(200)
+            .end((err, res) => {
+
+              if (err) return done(err)
+              let body = res.body
+              assert('object' === typeof body)
+              debug(body)
+              assert(body.id)
+              assert(body.house_id === id)
+              test.assertObject(body, data)
+              test.assertModelById(association, body.id, data, done)
+
+            })
+
+      }).catch(done)
+
+    })
+
+    it.only ('should return 409 | put /house/:id/members/:associationId, object body', function (done) {
+
+      const id = 1
+      const data = {
+        name: 'Arya',
+      }
+
+      association.find({
+        where: {
+          house_id: id
+        }
+      }).then(character => {
+
+          server
+            .put(`/gameofthrones/house/${id}/members/${character.id}`)
+            .send(data)
+            .expect(409)
+            .end((err, res) => {
+
+              if (err) return done(err)
+
+            })
+
+      }).catch(done)
 
     })
 
