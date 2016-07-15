@@ -285,7 +285,7 @@ describe ('model association routers', function () {
 
     })
 
-    it.only ('should return 204 | delete /seat/:id/house', function (done) {
+    it ('should return 204 | delete /seat/:id/house', function (done) {
 
       const id = 2
 
@@ -315,9 +315,367 @@ describe ('model association routers', function () {
 
   describe ('hasMany association', function () {
 
+    const model       = models.house
+    const association = models.character
+
+    it ('should return 200 | get /house/:id/members', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(data => {
+
+        server
+          .get(`/gameofthrones/house/${id}/members`)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            assert(body.length === 2)
+            done()
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 201 | post /house/:id/members, object body', function (done) {
+
+      const id = 1
+      const data = {
+        name: 'Sansa'  
+      }
+
+      model.findById(id).then(house => {
+
+        server
+          .post(`/gameofthrones/house/${id}/members`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.id)
+            assert(body.house_id === house.id)
+            test.assertObject(body, data)
+            test.assertModelById(association, body.id, data, done)
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 201 | post /house/:id/members, array body', function (done) {
+
+      const id = 1
+      const data = [{
+        name: 'Sansa'  
+      }, {
+        name: 'Bran'
+      }]
+
+      model.findById(id).then(house => {
+
+        server
+          .post(`/gameofthrones/house/${id}/members`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+
+            assert(body.length === data.length)
+
+            const promises = body.map((character, index) => {
+              assert(character.id)
+              assert(character.house_id === house.id)
+              test.assertObject(character, data[index])
+              return test.assertModelById(association, 
+                character.id, data[index])
+            })
+
+            Promise.all(promises).then(() => done())
+
+          })
+
+      }).catch(done)
+
+      it ('should return 201 | post /house/:id/members, object body', function (done) {
+
+        const id = 1
+        const data = {
+          name: 'Sansa'  
+        }
+
+        model.findById(id).then(house => {
+
+          server
+            .post(`/gameofthrones/house/${id}/members`)
+            .send(data)
+            .expect(201)
+            .end((err, res) => {
+
+              if (err) return done(err)
+              let body = res.body
+              assert('object' === typeof body)
+              debug(body)
+              assert(body.id)
+              assert(body.house_id === house.id)
+              test.assertObject(body, data)
+              test.assertModelById(association, body.id, data, done)
+
+            })
+
+        }).catch(done)
+
+      })
+
+    })
+
+    describe ('unique key constraint error', function () {
+
+      it ('should return 409 | post /house/:id/members, object body', function (done) {
+
+        const id = 1
+        association.find({
+          where: {
+            house_id: id
+          }
+        }).then(character => {
+         
+          character = character.dataValues
+          delete character.id
+          delete character.created_at
+          delete character.updated_at
+          delete character.deleted_at
+
+          debug(character)
+
+          server
+            .post(`/gameofthrones/house/${id}/members`)
+            .send(character)
+            .expect(409)
+            .end(done)
+          
+        }).catch(done)
+      
+      })
+
+      it.only ('should return 409 | post /house/:id/members, array body', function (done) {
+
+        const id = 1
+
+        association.findAll({
+          where: {
+            house_id: id
+          }
+        }).then(characters => {
+
+          characters = characters.map(character => {
+            character = character.dataValues
+            delete character.id
+            delete character.created_at
+            delete character.updated_at
+            delete character.deleted_at
+            return character
+          })
+
+          characters.push({
+            name: 'Sansa'
+          })
+         
+          debug(characters)
+
+          server
+            .post(`/gameofthrones/house/${id}/members`)
+            .send(characters)
+            .expect(409)
+            .end((err, res) => {
+              
+              if (err) return done(err)
+
+              association.findAll({
+                where: {
+                  house_id: id
+                }
+              }).then(data => {
+                assert(data.length === characters.length - 1)
+                assert(!data.find(row => row.name === 'Sansa'))
+                done()
+              })
+            })
+          
+        }).catch(done)
+      
+      })
+
+      it ('should return 201 | post /house/:id/members, object body', function (done) {
+
+        const id = 1
+
+        association.find({
+          where: {
+            house_id: id
+          }
+        }).then(character => {
+          return character.destroy().then(() => {
+            return association.findById(character.id).then(data => {
+              assert(!data)
+              return character.dataValues
+            })
+          })
+        }).then(character => {
+
+          delete character.id
+          delete character.created_at
+          delete character.updated_at
+          delete character.deleted_at
+
+          server
+            .post(`/gameofthrones/house/${id}/members`)
+            .send(character)
+            .expect(201)
+            .end((err, res) => {
+
+              if (err) return done(err)
+              let body = res.body
+              assert('object' === typeof body)
+              debug(body)
+              assert(body.id)
+              assert(body.house_id === id)
+              test.assertObject(body, character)
+              test.assertModelById(association, body.id, character, done)
+
+            })
+
+        }).catch(done)
+
+      })
+
+      it.only ('should return 201 | post /house/:id/members, array body', function (done) {
+
+        const id = 1
+
+        const where = { house_id: id }
+
+        association.findAll({ where }).then(characters => {
+          return association.destroy({ where }).then(() => {
+            return association.findAll({ where }).then(data => {
+              assert(!data.length)
+              return characters
+            })
+          })
+        }).then(characters => {
+
+          characters = characters.map(character => {
+
+            character = character.dataValues
+
+            delete character.id
+            delete character.created_at
+            delete character.updated_at
+            delete character.deleted_at
+
+            return character
+          })
+
+          characters.push({
+            name: 'Sansa'
+          })
+
+          server
+            .post(`/gameofthrones/house/${id}/members`)
+            .send(characters)
+            .expect(201)
+            .end((err, res) => {
+
+              if (err) return done(err)
+              let body = res.body
+              assert(Array.isArray(body))
+              debug(body)
+
+              let promises = body.map((character, index) => {
+                assert(character.id)
+                assert(character.house_id === id)
+                test.assertObject(character, characters[index])
+                test.assertModelById(association, character.id, characters[index])
+              })
+
+              Promise.all(promises).then(() => done())
+            })
+
+        }).catch(done)
+
+      })
+
+
+    })
+
   })
 
   describe ('belongsToMany association', function () {
+
+    const model       = models.user
+    const association = models.character
+
+    it ('should return 200 | get /user/:id/partialities', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(data => {
+
+        server
+          .get(`/user/${id}/partialities`)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            
+            assert(body.length === 4)
+            done()
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 200 | get /user/:id/pests', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(data => {
+
+        server
+          .get(`/user/${id}/pests`)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            assert(body.length === 1)
+            done()
+
+          })
+
+      }).catch(done)
+
+    })
 
   })
 
