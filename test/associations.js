@@ -215,7 +215,7 @@ describe ('model association routers', function () {
 
     })
 
-    it.only ('should return 200 | put /seat/:id/house', function (done) {
+    it ('should return 200 | put /seat/:id/house', function (done) {
 
       const id = 3
       const data = {
@@ -244,14 +244,14 @@ describe ('model association routers', function () {
 
     })
     
-    it.only ('should return 201 | put /seat/:id/house', function (done) {
+    it ('should return 201 | put /seat/:id/house', function (done) {
 
       const id = 2
       const data = {
         name: uuid()
       }
 
-      return model.findById(id).then(seat => {
+      model.findById(id).then(seat => {
         return association.destroy({
           where: {
             id: seat.house_id
@@ -263,7 +263,7 @@ describe ('model association routers', function () {
       }).then(seat => {
 
         server
-          .put(`/gameofthrones/seat/${seat.id}/house`)
+          .put(`/gameofthrones/seat/${id}/house`)
           .send(data)
           .expect(201)
           .end((err, res) => {
@@ -277,6 +277,33 @@ describe ('model association routers', function () {
               assert(body.id === seat.house_id)
               test.assertObject(body, data)
               test.assertModelById(association, seat.house_id, data, done)
+            })
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it.only ('should return 204 | delete /seat/:id/house', function (done) {
+
+      const id = 2
+
+      model.findById(id).then(seat => {
+        return association.findById(seat.house_id).then(house => {
+          assert(house)
+          return seat
+        })
+      }).then(seat => {
+
+        server
+          .del(`/gameofthrones/seat/${id}/house`)
+          .expect(204)
+          .end((err, res) => {
+
+            association.findById(seat.house_id).then(data => {
+              assert(!data)
+              done()
             })
 
           })
