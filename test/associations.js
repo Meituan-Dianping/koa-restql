@@ -971,6 +971,7 @@ describe ('model association routers', function () {
   describe ('belongsToMany association', function () {
 
     const model       = models.user
+    const through     = model.associations.characters.through.model
     const association = models.character
 
     it ('should return 200 | get /user/:id/partialities', function (done) {
@@ -1022,7 +1023,7 @@ describe ('model association routers', function () {
 
     })
     
-    it.only ('should return 201 | post /user/:id/, object body', function (done) {
+    it ('should return 201 | post /user/:id/characters, object body', function (done) {
 
       const id = 1
       const associationId = 2
@@ -1035,6 +1036,7 @@ describe ('model association routers', function () {
       }).then(character => {
 
         character = character.dataValues
+        test.deleteObjcetTimestamps(character)
 
         server
           .post(`/user/${id}/characters`)
@@ -1047,6 +1049,7 @@ describe ('model association routers', function () {
             assert('object' === typeof body)
             debug(body)
             assert(body.id)
+            assert(body.user_character)
             test.assertObject(body, character)
             test.assertModelById(association, body.id, character, done)
 
@@ -1056,29 +1059,28 @@ describe ('model association routers', function () {
 
     })
 
-    it ('should return 201 | post /house/:id/members, array body', function (done) {
+    it.only ('should return 201 | post /user/:id/characters, array body', function (done) {
 
       const id = 1
 
-      const where = { house_id: id }
+      const where = { user_id: id }
 
-      association.findAll({ where }).then(characters => {
-        return association.destroy({ where }).then(() => {
-          return association.findAll({ where }).then(data => {
+      through.findAll({ where }).then(user_characters => {
+        return through.destroy({ where }).then(() => {
+          return through.findAll({ where }).then(data => {
             assert(!data.length)
-            return characters
+            return user_characters.map(user_character => 
+              user_character.character_id)
           })
+        }).then(characterIds => {
+          return association.findAll({ where: { id: characterIds } })
         })
       }).then(characters => {
 
         characters = characters.map(character => {
 
           character = character.dataValues
-
-          delete character.id
-          delete character.created_at
-          delete character.updated_at
-          delete character.deleted_at
+          test.deleteObjcetTimestamps(character)
 
           return character
         })
@@ -1088,7 +1090,7 @@ describe ('model association routers', function () {
         })
 
         server
-          .post(`/gameofthrones/house/${id}/members`)
+          .post(`/user/${id}/characters`)
           .send(characters)
           .expect(201)
           .end((err, res) => {
@@ -1100,7 +1102,6 @@ describe ('model association routers', function () {
 
             let promises = body.map((character, index) => {
               assert(character.id)
-              assert(character.house_id === id)
               test.assertObject(character, characters[index])
               test.assertModelById(association, character.id, characters[index])
             })
