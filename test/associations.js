@@ -651,7 +651,7 @@ describe ('model association routers', function () {
 
     })
 
-    it ('should return 201 | post /house/:id/members, array body', function (done) {
+    it.only ('should return 200 | put /house/:id/members, array body', function (done) {
 
       const id = 1
       const data = [{
@@ -729,7 +729,7 @@ describe ('model association routers', function () {
 
     })
 
-    it.only ('should return 409 | put /house/:id/members/:associationId, object body', function (done) {
+    it ('should return 409 | put /house/:id/members/:associationId, object body', function (done) {
 
       const id = 1
       const data = {
@@ -742,15 +742,16 @@ describe ('model association routers', function () {
         }
       }).then(character => {
 
-          server
-            .put(`/gameofthrones/house/${id}/members/${character.id}`)
-            .send(data)
-            .expect(409)
-            .end((err, res) => {
+        server
+          .put(`/gameofthrones/house/${id}/members/${character.id}`)
+          .send(data)
+          .expect(409)
+          .end((err, res) => {
 
-              if (err) return done(err)
+            if (err) return done(err)
+            done()
 
-            })
+          })
 
       }).catch(done)
 
