@@ -729,29 +729,6 @@ describe ('model association routers', function () {
 
     })
 
-    it ('should return 409 | put /house/:id/members/:associationId, object body', function (done) {
-
-      const id = 1
-      const data = {
-        name: 'Arya',
-      }
-
-      association.find({
-        where: {
-          house_id: id
-        }
-      }).then(character => {
-
-        server
-          .put(`/gameofthrones/house/${id}/members/${character.id}`)
-          .send(data)
-          .expect(409)
-          .end(done)
-
-      }).catch(done)
-
-    })
-
     it ('should return 404 | delete /house/:id/members, object body', function (done) {
 
       const id = 100
@@ -819,6 +796,88 @@ describe ('model association routers', function () {
 
           })
       })
+
+    })
+
+
+    it ('should return 409 | put /house/:id/members/:associationId, object body', function (done) {
+
+      const id = 1
+      const data = {
+        name: 'Arya',
+      }
+
+      association.find({
+        where: {
+          house_id: id
+        }
+      }).then(character => {
+
+        server
+          .put(`/gameofthrones/house/${id}/members/${character.id}`)
+          .send(data)
+          .expect(409)
+          .end(done)
+
+      }).catch(done)
+
+    })
+
+    it ('should return 404 | get /house/:id/members/:associationId, wrong id', function (done) {
+
+      const id = 100
+      const associationId = 100
+
+      server
+        .get(`/gameofthrones/house/${id}/members/${associationId}`)
+        .expect(404)
+        .end(done)
+
+    })
+
+    it ('should return 404 | get /house/:id/members/:associationId, wrong associationId', function (done) {
+
+      const id = 1
+      const associationId = 100
+
+      server
+        .get(`/gameofthrones/house/${id}/members/${associationId}`)
+        .expect(404)
+        .end(done)
+
+    })
+
+    it.only ('should return 200 | get /house/:id/members/:associationId', function (done) {
+
+      const id = 1
+
+      const where = {
+        house_id: id
+      }
+
+      association.find({ where }).then(character => {
+
+        character = character.dataValues
+        test.deleteObjcetTimestamps(character)
+        
+        server
+          .get(`/gameofthrones/house/${id}/members/${character.id}`)
+          .expect(200)
+          .end((err, res) => {
+            
+            if (err) return done(err)
+
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.id)
+            assert(body.house_id === id)
+            test.assertObject(body, character)
+            test.assertModelById(association, body.id, character, done)
+            
+          })
+
+      }).catch(done)
 
     })
 
