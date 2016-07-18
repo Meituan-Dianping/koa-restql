@@ -47,6 +47,16 @@ module.exports.options = {
     associate: (models) => {
 
       models.user.belongsToMany(models.character, {
+        as: 'characters',
+        constraints: false,
+        through:  {
+          model: models.user_characters,
+        },
+        foreignKey: 'user_id',
+        otherKey: 'character_id'
+      })
+
+      models.user.belongsToMany(models.character, {
         as: 'partialities',
         constraints: false,
         through:  {

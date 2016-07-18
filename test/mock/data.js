@@ -30,7 +30,6 @@ module.exports = {
 
   user_characters: [
     { user_id: 1, character_id: 1, rate: 5 },
-    { user_id: 1, character_id: 2, rate: 5 },
     { user_id: 1, character_id: 3, rate: 4 },
     { user_id: 1, character_id: 4, rate: 5 },
     { user_id: 1, character_id: 5, rate: -5 },
