@@ -26,6 +26,13 @@ const assertModelById = (model, id, expect, done) => {
 
 }
 
+const deleteObjcetTimestamps = (data) => {
+  delete data.created_at
+  delete data.updated_at
+  delete data.deleted_at
+}
+
 module.exports.assertObject    = assertObject
 module.exports.assertModelById = assertModelById
+module.exports.deleteObjcetTimestamps = deleteObjcetTimestamps
 
