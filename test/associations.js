@@ -651,7 +651,7 @@ describe ('model association routers', function () {
 
     })
 
-    it.only ('should return 200 | put /house/:id/members, array body', function (done) {
+    it ('should return 200 | put /house/:id/members, array body', function (done) {
 
       const id = 1
       const data = [{
@@ -746,10 +746,127 @@ describe ('model association routers', function () {
           .put(`/gameofthrones/house/${id}/members/${character.id}`)
           .send(data)
           .expect(409)
+          .end(done)
+
+      }).catch(done)
+
+    })
+
+    it ('should return 404 | delete /house/:id/members, object body', function (done) {
+
+      const id = 100
+
+      server
+        .del(`/gameofthrones/house/${id}/members`)
+        .expect(404)
+        .end(done)
+
+    })
+
+    it ('should return 204 | delete /house/:id/members, destroy nothing', function (done) {
+
+      const id = 1
+      const where = {
+        house_id: id
+      }
+
+      association.count({
+        where
+      }).then(count => {
+
+        server
+          .del(`/gameofthrones/house/${id}/members`)
+          .expect(204)
           .end((err, res) => {
 
             if (err) return done(err)
-            done()
+            debug(count)
+
+            association.count({ where }).then(newCount => {
+              assert(newCount === count)
+              done()
+            }).catch(done)
+
+          })
+      })
+
+    })
+
+    it ('should return 204 | delete /house/:id/members', function (done) {
+
+      const id = 1
+      const where = {
+        name: 'Jon'
+      }
+
+      const querystring = qs.stringify(where)
+
+      association.findAll({ where }).then(characters => {
+        
+        assert(characters.length)
+
+        server
+          .del(`/gameofthrones/house/${id}/members?${querystring}`)
+          .expect(204)
+          .end((err, res) => {
+
+            if (err) return done(err)
+
+            association.findAll({ where }).then(characters => {
+              assert(!characters.length)
+              done()
+            }).catch(done)
+
+          })
+      })
+
+    })
+
+    it ('should return 404 | delete /house/:id/members/:associationId, wrong id', function (done) {
+
+      const id = 100
+      const associationId = 100
+
+      server
+        .del(`/gameofthrones/house/${id}/members/${associationId}`)
+        .expect(404)
+        .end(done)
+
+    })
+
+    it ('should return 404 | delete /house/:id/members/:associationId, wrong associationId', function (done) {
+
+      const id = 1
+      const associationId = 100
+
+      server
+        .del(`/gameofthrones/house/${id}/members/${associationId}`)
+        .expect(404)
+        .end(done)
+
+    })
+
+    it ('should return 204 | delete /house/:id/members/:associationId', function (done) {
+
+      const id = 1
+
+      const where = {
+        house_id: id
+      }
+
+      association.find({ where }).then(character => {
+        
+        server
+          .del(`/gameofthrones/house/${id}/members/${character.id}`)
+          .expect(204)
+          .end((err, res) => {
+            
+            if (err) return done(err)
+
+            association.findById(character.id).then(character => {
+              assert(!character)
+              done()
+            })
 
           })
 
