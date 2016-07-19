@@ -39,7 +39,7 @@ describe ('model belongsToMany association routers', function () {
   const through     = model.associations.characters.through.model
   const association = models.character
 
-  it.only ('should return 200 | get /user/:id/characters', function (done) {
+  it ('should return 200 | get /user/:id/characters', function (done) {
 
     const id = 1
 
@@ -72,7 +72,7 @@ describe ('model belongsToMany association routers', function () {
 
     const id = 1
 
-    model.findById(id).then(data => {
+    model.findById(id).then(user => {
 
       user.getPartialities().then(partialities => {
 
@@ -101,7 +101,7 @@ describe ('model belongsToMany association routers', function () {
 
     const id = 1
 
-    model.findById(id).then(data => {
+    model.findById(id).then(user => {
 
       user.getPests().then(pests => {
 
