@@ -39,26 +39,59 @@ describe ('model belongsToMany association routers', function () {
   const through     = model.associations.characters.through.model
   const association = models.character
 
+  it.only ('should return 200 | get /user/:id/characters', function (done) {
+
+    const id = 1
+
+    model.findById(id).then(user => {
+
+      user.getCharacters().then(characters => {
+
+        server
+          .get(`/user/${id}/characters`)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            
+            assert(body.length === characters.length)
+            done()
+
+          })
+
+      })
+
+    }).catch(done)
+
+  })
+
   it ('should return 200 | get /user/:id/partialities', function (done) {
 
     const id = 1
 
     model.findById(id).then(data => {
 
-      server
-        .get(`/user/${id}/partialities`)
-        .expect(200)
-        .end((err, res) => {
+      user.getPartialities().then(partialities => {
 
-          if (err) return done(err)
-          let body = res.body
-          assert(Array.isArray(body))
-          debug(body)
-          
-          assert(body.length === 4)
-          done()
+        server
+          .get(`/user/${id}/partialities`)
+          .expect(200)
+          .end((err, res) => {
 
-        })
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            
+            assert(body.length === partialities.length)
+            done()
+
+          })
+
+      })
 
     }).catch(done)
 
@@ -70,19 +103,98 @@ describe ('model belongsToMany association routers', function () {
 
     model.findById(id).then(data => {
 
+      user.getPests().then(pests => {
+
+        server
+          .get(`/user/${id}/pests`)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            assert(body.length === pests.length)
+            done()
+
+          })
+
+      })
+
+    }).catch(done)
+
+  })
+
+  it ('should return 404 | get /user/:id/characters', function (done) {
+
+    const id = 100
+
+    server
+      .get(`/user/${id}/characters`)
+      .expect(404)
+      .end(done)
+
+  })
+
+  it ('should return 200 | get /user/:id/characters/:associationId', function (done) {
+
+    const id = 1
+
+    model.findById(id).then(user => {
+
+      user.getCharacters().then(characters => {
+
+        let character = characters[0]
+        character = character.dataValues
+        test.deleteObjcetTimestamps(character)
+        delete character.user_characters
+
+        debug(character)
+
+        server
+          .get(`/user/${id}/characters/${character.id}`)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.user_characters)
+            test.assertObject(body, character)
+            done()
+
+          })
+
+      })
+
+    }).catch(done)
+
+  })
+  
+  it ('should return 404 | get /user/:id/characters/:associationId, wrong id', function (done) {
+
+    const id = 100
+
+    server
+      .get(`/user/${id}/characters/1`)
+      .expect(404)
+      .end(done)
+
+  })
+
+  it ('should return 404 | get /user/:id/characters/:associationId, wrong associationId', function (done) {
+
+    const id = 1
+
+    model.findById(id).then(user => {
+
+      assert(user)
+
       server
-        .get(`/user/${id}/pests`)
-        .expect(200)
-        .end((err, res) => {
-
-          if (err) return done(err)
-          let body = res.body
-          assert(Array.isArray(body))
-          debug(body)
-          assert(body.length === 1)
-          done()
-
-        })
+        .get(`/user/${id}/characters/100`)
+        .expect(404)
+        .end(done)
 
     }).catch(done)
 
@@ -114,7 +226,7 @@ describe ('model belongsToMany association routers', function () {
           assert('object' === typeof body)
           debug(body)
           assert(body.id)
-          assert(body.user_character)
+          assert(body.user_characters)
           test.assertObject(body, character)
           test.assertModelById(association, body.id, character, done)
 
@@ -124,30 +236,19 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it.only ('should return 201 | post /user/:id/characters, array body', function (done) {
+  it ('should return 201 | post /user/:id/characters, array body', function (done) {
 
     const id = 1
 
-    const where = { user_id: id }
+    model.findById(id).then(user => {
 
-    through.findAll({ where }).then(user_characters => {
-      return through.destroy({ where }).then(() => {
-        return through.findAll({ where }).then(data => {
-          assert(!data.length)
-          return user_characters.map(user_character => 
-            user_character.character_id)
-        })
-      }).then(characterIds => {
-        return association.findAll({ where: { id: characterIds } })
-      })
-    }).then(characters => {
+      assert(user)
 
-      characters = characters.map(character => {
+      const characters = []
 
-        character = character.dataValues
-        test.deleteObjcetTimestamps(character)
-
-        return character
+      /* exist character */
+      characters.push({
+        name: 'Arya' 
       })
 
       characters.push({
@@ -165,6 +266,8 @@ describe ('model belongsToMany association routers', function () {
           assert(Array.isArray(body))
           debug(body)
 
+          assert(body.length === characters.length)
+
           let promises = body.map((character, index) => {
             assert(character.id)
             test.assertObject(character, characters[index])
@@ -172,10 +275,169 @@ describe ('model belongsToMany association routers', function () {
           })
 
           Promise.all(promises).then(() => done())
+
         })
 
     }).catch(done)
 
   })
+
+
+  describe ('unique key constraint error', function () {
+
+    it ('should return 409 | post /user/:id/characters, object body', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(user => {
+
+        assert(user)
+        
+        user.getCharacters().then(characters => {
+
+          assert(characters.length)
+          
+          let character = characters[0].dataValues
+          test.deleteObjcetTimestamps(character)
+          delete character.user_characters
+         
+          server
+            .post(`/user/${id}/characters`)
+            .send(character)
+            .expect(409)
+            .end(done)
+          
+        })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 409 | post /user/:id/characters, array body', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(user => {
+
+        assert(user)
+        
+        user.getCharacters().then(characters => {
+
+          characters = characters.map(character => {
+            character = character.dataValues
+            test.deleteObjcetTimestamps(character)
+            delete character.user_characters
+            return character
+          })
+         
+          server
+            .post(`/user/${id}/characters`)
+            .send(characters)
+            .expect(409)
+            .end(done)
+          
+        })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 201 | post /user/:id/characters, object body', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(user => {
+        assert(user)
+        return user.getCharacters().then(characters => {
+          return user.setCharacters([]).then(() => {
+            return user.getCharacters()
+          }).then(data => {
+            assert(!data.length)
+            return characters
+          })
+        })
+      }).then(characters => {
+
+        const character = characters[0].dataValues
+        test.deleteObjcetTimestamps(character)
+        delete character.user_characters
+
+        server
+          .post(`/user/${id}/characters`)
+          .send(character)
+          .expect(201)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.user_characters)
+            /* test default value */
+            assert(body.user_characters.rate === 0)
+            test.assertObject(body, character)
+            test.assertModelById(association, body.id, character, done)
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 201 | post /user/:id/characters, array body', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(user => {
+        assert(user)
+        return user.getCharacters().then(characters => {
+          return user.setCharacters([]).then(() => {
+            return user.getCharacters()
+          }).then(data => {
+            assert(!data.length)
+            return characters
+          })
+        })
+      }).then(characters => {
+
+        characters = characters.map(character => {
+
+          character = character.dataValues
+          test.deleteObjcetTimestamps(character)
+          delete character.user_characters
+
+          return character
+        })
+
+        characters.push({
+          name: 'Sansa'
+        })
+
+        server
+          .post(`/user/${id}/characters`)
+          .send(characters)
+          .expect(201)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+
+            let promises = body.map((character, index) => {
+              assert(character.id)
+              test.assertObject(character, characters[index])
+              test.assertModelById(association, character.id, characters[index])
+            })
+
+            Promise.all(promises).then(() => done())
+          })
+
+      }).catch(done)
+
+    })
+
+  })
+
 
 })
