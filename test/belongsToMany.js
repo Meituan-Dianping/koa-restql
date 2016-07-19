@@ -282,6 +282,157 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
+  it ('should return 200 | put /user/:id/characters, object body', function (done) {
+
+    const id = 1
+    const associationId = 2
+
+    association.findById(associationId).then(character => {
+      
+      assert(character)
+      return character
+
+    }).then(character => {
+
+      character = character.dataValues
+      test.deleteObjcetTimestamps(character)
+
+      server
+        .put(`/user/${id}/characters`)
+        .send(character)
+        .expect(200)
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert('object' === typeof body)
+          debug(body)
+          assert(body.id)
+          assert(body.user_characters)
+          test.assertObject(body, character)
+          test.assertModelById(association, body.id, character, done)
+
+        })
+
+    }).catch(done)
+
+  })
+
+
+  it ('should return 200 | put /user/:id/characters, array body', function (done) {
+
+    const id = 1
+
+    model.findById(id).then(user => {
+
+      assert(user)
+
+      const characters = []
+
+      /* exist character */
+      characters.push({
+        name: 'Arya' 
+      })
+
+      characters.push({
+        name: 'Sansa'
+      })
+
+      server
+        .put(`/user/${id}/characters`)
+        .send(characters)
+        .expect(200)
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          debug(body)
+
+          assert(body.length === characters.length)
+
+          let promises = body.map((character, index) => {
+            assert(character.id)
+            test.assertObject(character, characters[index])
+            test.assertModelById(association, character.id, characters[index])
+          })
+
+          Promise.all(promises).then(() => done())
+
+        })
+
+    }).catch(done)
+
+  })
+
+
+  it.only ('should return 200 | put /user/:id/characters, object body, update', function (done) {
+
+    const id = 1
+
+    model.findById(id).then(user => {
+
+      assert(user)
+      
+      user.getCharacters().then(characters => {
+
+        assert(characters.length)
+        
+        let character = characters[0].dataValues
+        test.deleteObjcetTimestamps(character)
+        delete character.user_characters
+       
+        server
+          .put(`/user/${id}/characters`)
+          .send(character)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.id)
+            assert(body.user_characters)
+            test.assertObject(body, character)
+            test.assertModelById(association, body.id, character, done)
+
+          })
+        
+      })
+
+    }).catch(done)
+
+  })
+
+  it ('should return 200 | put /user/:id/characters, array body, update', function (done) {
+
+    const id = 1
+
+    model.findById(id).then(user => {
+
+      assert(user)
+      
+      user.getCharacters().then(characters => {
+
+        characters = characters.map(character => {
+          character = character.dataValues
+          test.deleteObjcetTimestamps(character)
+          delete character.user_characters
+          return character
+        })
+       
+        server
+          .put(`/user/${id}/characters`)
+          .send(characters)
+          .expect(200)
+          .end(done)
+        
+      })
+
+    }).catch(done)
+
+  })
 
   describe ('unique key constraint error', function () {
 
