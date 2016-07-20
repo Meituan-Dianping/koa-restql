@@ -136,7 +136,7 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it ('should return 200 | get /user/:id/characters/:associationId', function (done) {
+  it ('should return 200 | get /user/:id/characters/:associationId, update character', function (done) {
 
     const id = 1
 
@@ -146,6 +146,7 @@ describe ('model belongsToMany association routers', function () {
 
         let character = characters[0]
         character = character.dataValues
+        character.is_bastard = !character.is_bastard
         test.deleteObjcetTimestamps(character)
         delete character.user_characters
 
@@ -501,7 +502,18 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it ('should return 200 | put /user/:id/characters/:associationId', function (done) {
+  it ('should return 404 | put /user/:id/characters', function (done) {
+
+    const id = 100
+
+    server
+      .put(`/user/${id}/characters`)
+      .expect(404)
+      .end(done)
+
+  })
+
+  it ('should return 200 | put /user/:id/characters/:associationId, update character', function (done) {
 
     const id = 1
 
@@ -542,14 +554,53 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it ('should return 404 | put /user/:id/characters', function (done) {
+  it.only ('should return 200 | put /user/:id/characters/:associationId, create relationship', function (done) {
 
-    const id = 100
+    const id = 1
+    const associationId = 2
 
-    server
-      .put(`/user/${id}/characters`)
-      .expect(404)
-      .end(done)
+    association.findById(associationId).then(character => {
+      character = character.dataValues
+      test.deleteObjcetTimestamps(character)
+      debug(character)
+      setTimeout(() => {
+        association.upsert(character).then(res => {
+          debug(res)
+            done()
+        })
+      }, 0)
+    })
+
+    //model.findById(id).then(user => {
+
+    //  assert(user)
+
+    //  association.findById(associationId).then(character => {
+
+    //    character = character.dataValues
+    //    test.deleteObjcetTimestamps(character)
+
+    //    debug(character)
+    //      
+    //    server
+    //      .put(`/user/${id}/characters/${associationId}`)
+    //      .send(character)
+    //      .expect(200)
+    //      .end((err, res) => {
+
+    //        if (err) return done(err)
+    //        let body = res.body
+    //        assert('object' === typeof body)
+    //        debug(body)
+    //        assert(body.id)
+    //        assert(body.user_characters)
+    //        test.assertObject(body, character)
+    //        test.assertModelById(association, body.id, character, done)
+
+    //      })
+
+    //  })
+    //}).catch(done)
 
   })
 
@@ -600,20 +651,6 @@ describe ('model belongsToMany association routers', function () {
       .end(done)
 
   })
-
-  it.only ('should return 404 | put /user/:id/characters/:associationId, wrong association id', function (done) {
-
-    const id = 1
-    const associationId = 2
-
-    server
-      .put(`/user/${id}/characters/${associationId}`)
-      .send({})
-      .expect(404)
-      .end(done)
-
-  })
-
 
   describe ('unique key constraint error', function () {
 
