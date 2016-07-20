@@ -282,7 +282,18 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it.only ('should return 200 | put /user/:id/characters, object body', function (done) {
+  it ('should return 404 | post /user/:id/characters', function (done) {
+
+    const id = 100
+
+    server
+      .post(`/user/${id}/characters`)
+      .expect(404)
+      .end(done)
+
+  })
+
+  it ('should return 200 | put /user/:id/characters, object body', function (done) {
 
     const id = 1
     const associationId = 2
@@ -318,6 +329,39 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
+  it ('should return 201 | put /user/:id/characters, object body', function (done) {
+
+    const id = 1
+    const associationId = 2
+
+    model.findById(id).then(user => {
+
+      assert(user)
+
+      const character = {
+        name: 'Sansa'
+      }
+
+      server
+        .put(`/user/${id}/characters`)
+        .send(character)
+        .expect(201)
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert('object' === typeof body)
+          debug(body)
+          assert(body.id)
+          assert(body.user_characters)
+          test.assertObject(body, character)
+          test.assertModelById(association, body.id, character, done)
+
+        })
+
+    }).catch(done)
+
+  })
 
   it ('should return 200 | put /user/:id/characters, array body', function (done) {
 
@@ -379,6 +423,8 @@ describe ('model belongsToMany association routers', function () {
         
         let character = characters[0].dataValues
         test.deleteObjcetTimestamps(character)
+        
+        const userCharatersId = character.user_characters.id
         delete character.user_characters
        
         server
@@ -393,6 +439,7 @@ describe ('model belongsToMany association routers', function () {
             debug(body)
             assert(body.id)
             assert(body.user_characters)
+            assert(body.user_characters.id === userCharatersId)
             test.assertObject(body, character)
             test.assertModelById(association, body.id, character, done)
 
@@ -416,6 +463,7 @@ describe ('model belongsToMany association routers', function () {
 
         characters = characters.map(character => {
           character = character.dataValues
+          character.userCharactersId = character.user_characters.id
           test.deleteObjcetTimestamps(character)
           delete character.user_characters
           return character
@@ -436,6 +484,9 @@ describe ('model belongsToMany association routers', function () {
 
             let promises = body.map((character, index) => {
               assert(character.id)
+              assert(character.user_characters)
+              assert(character.user_characters.id === characters[index].userCharactersId)
+              delete characters[index].userCharactersId
               test.assertObject(character, characters[index])
               test.assertModelById(association, character.id, characters[index])
             })
@@ -466,7 +517,7 @@ describe ('model belongsToMany association routers', function () {
         test.deleteObjcetTimestamps(character)
         delete character.user_characters
 
-        character.is_bastard = !!character.is_bastard
+        character.is_bastard = !character.is_bastard
        
         server
           .put(`/user/${id}/characters/${character.id}`)
@@ -490,6 +541,79 @@ describe ('model belongsToMany association routers', function () {
     }).catch(done)
 
   })
+
+  it ('should return 404 | put /user/:id/characters', function (done) {
+
+    const id = 100
+
+    server
+      .put(`/user/${id}/characters`)
+      .expect(404)
+      .end(done)
+
+  })
+
+  it ('should return 201 | put /user/:id/characters/:associationId', function (done) {
+
+    const id = 1
+    const associationId = 100
+
+    model.findById(id).then(user => {
+
+      assert(user)
+
+      const character = {
+        id: associationId,
+        name: 'Sansa',
+        house_id: 1
+      }
+
+      server
+        .put(`/user/${id}/characters/${character.id}`)
+        .send(character)
+        .expect(201)
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert('object' === typeof body)
+          debug(body)
+          assert(body.id)
+          assert(body.user_characters)
+          test.assertObject(body, character)
+          test.assertModelById(association, body.id, character, done)
+
+        })
+
+    }).catch(done)
+
+  })
+
+  it ('should return 404 | put /user/:id/characters/:associationId, wrong id', function (done) {
+
+    const id = 100
+
+    server
+      .put(`/user/${id}/characters/1`)
+      .send({})
+      .expect(404)
+      .end(done)
+
+  })
+
+  it.only ('should return 404 | put /user/:id/characters/:associationId, wrong association id', function (done) {
+
+    const id = 1
+    const associationId = 2
+
+    server
+      .put(`/user/${id}/characters/${associationId}`)
+      .send({})
+      .expect(404)
+      .end(done)
+
+  })
+
 
   describe ('unique key constraint error', function () {
 
