@@ -282,7 +282,7 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it ('should return 200 | put /user/:id/characters, object body', function (done) {
+  it.only ('should return 200 | put /user/:id/characters, object body', function (done) {
 
     const id = 1
     const associationId = 2
@@ -365,8 +365,7 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-
-  it.only ('should return 200 | put /user/:id/characters, object body, update', function (done) {
+  it ('should return 200 | put /user/:id/characters, object body, update', function (done) {
 
     const id = 1
 
@@ -426,7 +425,65 @@ describe ('model belongsToMany association routers', function () {
           .put(`/user/${id}/characters`)
           .send(characters)
           .expect(200)
-          .end(done)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+
+            assert(body.length === characters.length)
+
+            let promises = body.map((character, index) => {
+              assert(character.id)
+              test.assertObject(character, characters[index])
+              test.assertModelById(association, character.id, characters[index])
+            })
+
+            Promise.all(promises).then(() => done())
+
+          })
+        
+      })
+
+    }).catch(done)
+
+  })
+
+  it ('should return 200 | put /user/:id/characters/:associationId', function (done) {
+
+    const id = 1
+
+    model.findById(id).then(user => {
+
+      assert(user)
+      
+      user.getCharacters().then(characters => {
+
+        assert(characters.length)
+        
+        let character = characters[0].dataValues
+        test.deleteObjcetTimestamps(character)
+        delete character.user_characters
+
+        character.is_bastard = !!character.is_bastard
+       
+        server
+          .put(`/user/${id}/characters/${character.id}`)
+          .send(character)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.id)
+            assert(body.user_characters)
+            test.assertObject(body, character)
+            test.assertModelById(association, body.id, character, done)
+
+          })
         
       })
 
