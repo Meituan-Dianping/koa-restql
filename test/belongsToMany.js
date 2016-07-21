@@ -560,15 +560,22 @@ describe ('model belongsToMany association routers', function () {
     const associationId = 2
 
     association.findById(associationId).then(character => {
+      
       character = character.dataValues
       test.deleteObjcetTimestamps(character)
       debug(character)
       setTimeout(() => {
         association.upsert(character).then(res => {
           debug(res)
-            done()
+        }).then(() => {
+          character = {}
+          character.name = 'Sansa'
+          return association.upsert(character)
+        }).then(res => {
+          debug(res)
+          done()
         })
-      }, 0)
+      }, 2000)
     })
 
     //model.findById(id).then(user => {
