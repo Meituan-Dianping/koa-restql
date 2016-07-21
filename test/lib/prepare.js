@@ -73,7 +73,10 @@ const loadMockData = () => {
     , promises = []
 
   return sequelize.sync({
-    force: true
+
+    logging : debug,
+    force   : true
+
   }).then(() => {
     Object.keys(models).forEach(key => {
 
