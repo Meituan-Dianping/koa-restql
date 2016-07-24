@@ -87,6 +87,11 @@ describe ('model belongsToMany association routers', function () {
             debug(body)
             
             assert(body.length === partialities.length)
+            body.forEach(user => {
+              assert(user.user_characters)
+              assert(user.user_characters.rate > 0)
+            })
+
             done()
 
           })
@@ -115,6 +120,12 @@ describe ('model belongsToMany association routers', function () {
             assert(Array.isArray(body))
             debug(body)
             assert(body.length === pests.length)
+
+            body.forEach(user => {
+              assert(user.user_characters)
+              assert(user.user_characters.rate < 0)
+            })
+
             done()
 
           })
@@ -125,7 +136,7 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it ('should return 404 | get /user/:id/characters', function (done) {
+  it('should return 404 | get /user/:id/characters', function (done) {
 
     const id = 100
 
@@ -136,7 +147,7 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it ('should return 200 | get /user/:id/characters/:associationId, update character', function (done) {
+  it ('should return 200 | get /user/:id/characters/:associationId ', function (done) {
 
     const id = 1
 
@@ -146,7 +157,7 @@ describe ('model belongsToMany association routers', function () {
 
         let character = characters[0]
         character = character.dataValues
-        character.is_bastard = !character.is_bastard
+
         test.deleteObjcetTimestamps(character)
         delete character.user_characters
 
@@ -163,7 +174,7 @@ describe ('model belongsToMany association routers', function () {
             debug(body)
             assert(body.user_characters)
             test.assertObject(body, character)
-            done()
+            test.assertModelById(association, body.id, character, done)
 
           })
 
@@ -554,60 +565,46 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  it.only ('should return 200 | put /user/:id/characters/:associationId, create relationship', function (done) {
+  it ('should return 200 | put /user/:id/characters/:associationId, create relationship', function (done) {
 
     const id = 1
     const associationId = 2
 
-    association.findById(associationId).then(character => {
-      
-      character = character.dataValues
-      test.deleteObjcetTimestamps(character)
-      debug(character)
-      setTimeout(() => {
-        association.upsert(character).then(res => {
-          debug(res)
-        }).then(() => {
-          character = {}
-          character.name = 'Sansa'
-          return association.upsert(character)
-        }).then(res => {
-          debug(res)
-          done()
-        })
-      }, 2000)
-    })
+    model.findById(id).then(user => {
 
-    //model.findById(id).then(user => {
+      assert(user)
 
-    //  assert(user)
+      association.findById(associationId).then(character => {
 
-    //  association.findById(associationId).then(character => {
+        character = character.dataValues
+        test.deleteObjcetTimestamps(character)
 
-    //    character = character.dataValues
-    //    test.deleteObjcetTimestamps(character)
+        debug(character)
+          
+        server
+          .put(`/user/${id}/characters/${associationId}`)
+          .send(character)
+          .end((err, res) => {
 
-    //    debug(character)
-    //      
-    //    server
-    //      .put(`/user/${id}/characters/${associationId}`)
-    //      .send(character)
-    //      .expect(200)
-    //      .end((err, res) => {
+            // sequelize bug which upsert return wrong value
+            debug(res.statusCode)
+            assert([200, 201].indexOf(res.statusCode) !== -1)
 
-    //        if (err) return done(err)
-    //        let body = res.body
-    //        assert('object' === typeof body)
-    //        debug(body)
-    //        assert(body.id)
-    //        assert(body.user_characters)
-    //        test.assertObject(body, character)
-    //        test.assertModelById(association, body.id, character, done)
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.id)
+            assert(body.user_characters)
+            assert(body.user_characters.user_id === id)
+            assert(body.user_characters.character_id === associationId)
+            test.assertObject(body, character)
+            test.assertModelById(association, body.id, character, done)
 
-    //      })
+          })
 
-    //  })
-    //}).catch(done)
+      })
+    }).catch(done)
 
   })
 
@@ -789,6 +786,8 @@ describe ('model belongsToMany association routers', function () {
           name: 'Sansa'
         })
 
+        debug(characters)
+
         server
           .post(`/user/${id}/characters`)
           .send(characters)
@@ -815,5 +814,133 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
+  describe ('DELETE', function () {
+
+    it ('should return 204 | delete /user/:id/characters', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(user => {
+        
+        assert(user)
+
+        return user.getCharacters().then(characters => {
+          return { user, characters }
+        })
+
+      }).then(res => {
+
+        let {
+          user, characters
+        } = res
+
+        characters = characters.map(character => {
+          character = character.dataValues
+          test.deleteObjcetTimestamps(character)
+          return character
+        })
+
+        server
+          .del(`/user/${user.id}/characters`)
+          .expect(204)
+          .end((err, res) => {
+
+            if (err) return done(err)
+
+            user.getCharacters().then(characters => {
+              debug(characters)     
+              return association.findAll({ where })
+            }).then(characters => {
+              assert(characters.length)
+              done()
+            })
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it ('should return 204 | delete /user/:id/characters, with querystring', function (done) {
+
+      const id = 1
+
+      const where = {
+        house_id: 4
+      }
+
+      const querystring = qs.stringify(where)
+
+      model.findById(id).then(user => {
+        
+        assert(user)
+
+        server
+          .del(`/user/${user.id}/characters?${querystring}`)
+          .expect(204)
+          .end((err, res) => {
+
+            if (err) return done(err)
+
+            user.getCharacters({ where }).then(characters => {
+              assert(characters.length === 0)
+              return association.findAll({ where })
+            }).then(characters => {
+              assert(characters.length)
+              done()
+            })
+
+          })
+
+      }).catch(done)
+
+    })
+
+    it.only ('should return 204 | delete /user/:id/characters/:associationId', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(user => {
+        
+        assert(user)
+
+        return user.getCharacters().then(characters => {
+          return { user, characters }
+        })
+
+      }).then(res => {
+
+        let {
+          user, characters
+        } = res
+
+        assert(characters.length)
+
+        const character = characters[0]
+        const where = {}
+        where.id = character.id
+
+        server
+          .del(`/user/${user.id}/characters/${character.id}`)
+          .expect(204)
+          .end((err, res) => {
+
+            if (err) return done(err)
+
+            user.getCharacters({ where }).then(characters => {
+              assert(characters.length === 0)
+              return user.getCharacters({ where })
+            }).then(character => {
+              assert(character)
+              done()
+            })
+
+          })
+
+      }).catch(done)
+
+    })
+
+  })
 
 })
