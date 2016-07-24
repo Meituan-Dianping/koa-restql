@@ -814,7 +814,7 @@ describe ('model belongsToMany association routers', function () {
 
   })
 
-  describe ('DELETE', function () {
+  describe.only ('DELETE', function () {
 
     it ('should return 204 | delete /user/:id/characters', function (done) {
 
@@ -830,15 +830,11 @@ describe ('model belongsToMany association routers', function () {
 
       }).then(res => {
 
-        let {
+        const {
           user, characters
         } = res
 
-        characters = characters.map(character => {
-          character = character.dataValues
-          test.deleteObjcetTimestamps(character)
-          return character
-        })
+        const characterIds = characters.map(character => character.id)
 
         server
           .del(`/user/${user.id}/characters`)
@@ -848,8 +844,10 @@ describe ('model belongsToMany association routers', function () {
             if (err) return done(err)
 
             user.getCharacters().then(characters => {
-              debug(characters)     
-              return association.findAll({ where })
+              assert(characters.length === 0)
+              return model.findAll({
+                where: { id: characterIds }
+              })
             }).then(characters => {
               assert(characters.length)
               done()
@@ -896,7 +894,7 @@ describe ('model belongsToMany association routers', function () {
 
     })
 
-    it.only ('should return 204 | delete /user/:id/characters/:associationId', function (done) {
+    it ('should return 204 | delete /user/:id/characters/:associationId', function (done) {
 
       const id = 1
 
@@ -940,6 +938,46 @@ describe ('model belongsToMany association routers', function () {
       }).catch(done)
 
     })
+
+    it('should return 404 | del /user/:id/characters', function (done) {
+
+      const id = 100
+
+      server
+        .del(`/user/${id}/characters`)
+        .expect(404)
+        .end(done)
+
+    })
+
+    it ('should return 404 | del /user/:id/characters/:associationId, wrong id', function (done) {
+
+      const id = 100
+
+      server
+        .del(`/user/${id}/characters/1`)
+        .expect(404)
+        .end(done)
+
+    })
+
+    it ('should return 404 | del /user/:id/characters/:associationId, wrong associationId', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(user => {
+
+        assert(user)
+
+        server
+          .del(`/user/${id}/characters/100`)
+          .expect(404)
+          .end(done)
+
+      }).catch(done)
+
+    })
+
 
   })
 
