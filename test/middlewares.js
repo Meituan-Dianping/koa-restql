@@ -1571,6 +1571,37 @@ describe ('middlewares', function () {
       })    
   })
 
+  it ('should get all user whether it has profile', function (done) {
+
+    let data = {
+      login: 'dean'
+    }
+
+    let querystring = qs.stringify({
+      _include: [
+        { association: 'profile', required: false },
+      ]      
+    });
+
+    server
+      .post('/user')
+      .send(data)
+      .expect(201)
+      .end((err, res) => {
+        if (err) return done(err);
+        server
+          .get(`/user?${querystring}`)
+          .expect(200)
+          .end((err, res) => {
+            if (err) return done(err);
+            let body = res.body;
+            debug(body);
+            assert(body.some(user => !user.profile));
+            done();
+          })
+      })    
+  })
+
   it ('should get an user with profile & tags | object array', function (done) {
 
     let querystring = qs.stringify({
