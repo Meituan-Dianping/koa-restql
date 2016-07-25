@@ -14,7 +14,7 @@ const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
 
-describe.only ('pagination', function () {
+describe ('pagination', function () {
 
   let server
 
@@ -252,7 +252,6 @@ describe.only ('pagination', function () {
         })
 
     })
-
 
   })
 
