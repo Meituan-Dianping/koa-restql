@@ -1548,7 +1548,7 @@ describe ('middlewares', function () {
 
     let querystring = qs.stringify({
       _include: [
-        { association: 'profile', required: true },
+        { association: 'profile', required: 1 },
       ]      
     });
 
@@ -1579,7 +1579,7 @@ describe ('middlewares', function () {
 
     let querystring = qs.stringify({
       _include: [
-        { association: 'profile', required: false },
+        { association: 'profile', required: 0 },
       ]      
     });
 
