@@ -14,7 +14,7 @@ const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
 
-describe ('model association routers', function () {
+describe ('model belongsTo association routers', function () {
 
   let server
 
@@ -25,6 +25,7 @@ describe ('model association routers', function () {
 
     app.use(restql.routes())
     server = request(http.createServer(app.callback()))
+
   })
 
   beforeEach (function (done) {
@@ -33,73 +34,13 @@ describe ('model association routers', function () {
     prepare.loadMockData().then(() => {
       done()
     }).catch(done)  
-  })
-
-  describe ('hasOne association', function () {
-    
-    const model       = models.house
-    const association = models.seat
-
-    it ('should return 200 | get /house/:id/seat', function (done) {
-
-      const id = 2
-
-      model.findById(id).then(data => {
-
-        server
-          .get(`/gameofthrones/house/${id}/seat`)
-          .expect(200)
-          .end((err, res) => {
-
-            if (err) return done(err)
-            let body = res.body
-            assert('object' === typeof body)
-            debug(body)
-            assert(body.house_id === id)
-            done()
-
-          })
-
-      }).catch(done)
-
-    })
-
-    it ('should return 200 | put /house/:id/seat', function (done) {
-
-      const id = 2
-      const data = {
-        name: uuid()
-      }
-
-      model.findById(id).then(house => {
-
-        server
-          .put(`/gameofthrones/house/${id}/seat`)
-          .send(data)
-          .expect(200)
-          .end((err, res) => {
-
-            if (err) return done(err)
-            let body = res.body
-            assert('object' === typeof body)
-            debug(body)
-            assert(body.house_id === id)
-            test.assertObject(body, data)
-            test.assertModelById(association, body.house_id, data, done)
-
-          })
-
-      }).catch(done)
-
-    })
-
 
   })
 
-  describe ('belongsTo association', function () {
+  const model       = models.seat
+  const association = models.house
 
-    const model       = models.seat
-    const association = models.house
+  describe ('GET', function () {
 
     it ('should return 200 | get /seat/:id/house', function (done) {
 
@@ -115,7 +56,6 @@ describe ('model association routers', function () {
             if (err) return done(err)
             let body = res.body
             assert('object' === typeof body)
-            debug(body)
             assert(body.id === data.house_id)
             done()
 
@@ -124,6 +64,33 @@ describe ('model association routers', function () {
       }).catch(done)
 
     })
+
+    it ('should return 404 | get /seat/:id/house', function (done) {
+
+      const id = 3
+
+      model.findById(id).then(seat => {
+
+        return seat.getHouse().then(house => {
+          return house.destroy().then(() => {
+            return { seat, house }
+          })
+        })
+
+      }).then(res => {
+
+        server
+          .get(`/gameofthrones/seat/${id}/house`)
+          .expect(404)
+          .end(done)
+
+      }).catch(done)
+
+    })
+
+  })
+
+  describe ('PUT', function () {
 
     it ('should return 200 | put /seat/:id/house', function (done) {
 
@@ -195,6 +162,11 @@ describe ('model association routers', function () {
 
     })
 
+
+  })
+
+  describe ('DELETE', function () {
+
     it ('should return 204 | delete /seat/:id/house', function (done) {
 
       const id = 2
@@ -221,6 +193,34 @@ describe ('model association routers', function () {
       }).catch(done)
 
     })
+
+    it ('should return 404 | delete /seat/:id/house', function (done) {
+
+      const id = 2
+
+      model.findById(id).then(seat => {
+
+        return seat.getHouse().then(house => {
+          return house.destroy().then(() => {
+            return { seat, house }
+          })
+        })
+
+      }).then(res => {
+
+        const {
+          seat, house
+        } = res
+
+        server
+          .del(`/gameofthrones/seat/${seat.id}/house`)
+          .expect(404)
+          .end(done)
+
+      }).catch(done)
+
+    })
+
   })
 
 })
