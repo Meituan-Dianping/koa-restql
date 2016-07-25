@@ -25,6 +25,7 @@ describe ('model routers', function () {
 
     app.use(restql.routes())
     server = request(http.createServer(app.callback()))
+
   })
 
   beforeEach (function (done) {
@@ -33,6 +34,7 @@ describe ('model routers', function () {
     prepare.loadMockData().then(() => {
       done()
     }).catch(done)  
+
   })
 
   describe ('user | with single field unique index', function () {
@@ -211,25 +213,6 @@ describe ('model routers', function () {
             done()
           }).catch(done)
 
-        })
-
-    })
-
-    it ('should return 204 | delete /user, no query, delete nothing', function (done) {
-
-      models.user.count().then(count => {
-        server
-          .del(`/user`)
-          .expect(204)
-          .end((err, res) => {
-
-            if (err) return done(err)
-            models.user.count().then(newCount => {
-              assert(count === newCount)
-              done()
-            }).catch(done)
-
-          })
         })
 
     })
