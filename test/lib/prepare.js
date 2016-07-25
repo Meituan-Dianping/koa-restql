@@ -67,6 +67,17 @@ const loadMockModels = (modelsPath, schema) => {
   })
 }
 
+const reset = () => {
+
+  return sequelize.sync({
+
+    logging : debug,
+    force   : true
+
+  })
+
+}
+
 const loadMockData = () => {
 
   let models   = sequelize.models
@@ -108,5 +119,5 @@ Object.keys(models).forEach(key => {
 })
 
 module.exports = {
-  sequelize, loadMockData
+  sequelize, loadMockData, reset
 }
