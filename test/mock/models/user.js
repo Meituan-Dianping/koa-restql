@@ -10,13 +10,13 @@ module.exports.attributes = (DataTypes) => {
     },   
 
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
       defaultValue: ''
     }, 
 
     nickname: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
       defaultValue: ''
     }, 
