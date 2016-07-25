@@ -14,7 +14,7 @@ const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
 
-describe ('model association routers', function () {
+describe ('model hasOne association routers', function () {
 
   let server
 
@@ -25,6 +25,7 @@ describe ('model association routers', function () {
 
     app.use(restql.routes())
     server = request(http.createServer(app.callback()))
+
   })
 
   beforeEach (function (done) {
@@ -33,12 +34,13 @@ describe ('model association routers', function () {
     prepare.loadMockData().then(() => {
       done()
     }).catch(done)  
+
   })
 
-  describe ('hasOne association', function () {
-    
-    const model       = models.house
-    const association = models.seat
+  const model       = models.house
+  const association = models.seat
+
+  describe ('GET', function () {
 
     it ('should return 200 | get /house/:id/seat', function (done) {
 
@@ -63,6 +65,21 @@ describe ('model association routers', function () {
       }).catch(done)
 
     })
+
+    it ('should return 404 | get /house/:id/seat', function (done) {
+
+      const id = 100
+
+      server
+        .get(`/gameofthrones/house/${id}/seat`)
+        .expect(404)
+        .end(done)
+
+    })
+
+  })
+
+  describe ('PUT', function () {
 
     it ('should return 200 | put /house/:id/seat', function (done) {
 
@@ -93,125 +110,70 @@ describe ('model association routers', function () {
 
     })
 
+    it.only ('should return 200 | put /house/:id/seat, restore from destroyed', function (done) {
+
+      const id = 2
+      const data = {
+        name: uuid()
+      }
+
+      association.destroy({
+        where: {
+          house_id: id
+        }      
+      }).then((row) => {
+        assert(row)
+        return model.findById(id)
+      }).then(house => {
+
+        server
+          .put(`/gameofthrones/house/${id}/seat`)
+          .send(data)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.house_id === id)
+            test.assertObject(body, data)
+            test.assertModelById(association, body.house_id, data, done)
+
+          })
+
+      }).catch(done)
+
+    })
+
 
   })
 
-  describe ('belongsTo association', function () {
+  describe ('DELETE', function () {
 
-    const model       = models.seat
-    const association = models.house
-
-    it ('should return 200 | get /seat/:id/house', function (done) {
-
-      const id = 3
-
-      model.findById(id).then(data => {
-
-        server
-          .get(`/gameofthrones/seat/${id}/house`)
-          .expect(200)
-          .end((err, res) => {
-
-            if (err) return done(err)
-            let body = res.body
-            assert('object' === typeof body)
-            debug(body)
-            assert(body.id === data.house_id)
-            done()
-
-          })
-
-      }).catch(done)
-
-    })
-
-    it ('should return 200 | put /seat/:id/house', function (done) {
-
-      const id = 3
-      const data = {
-        name: uuid()
-      }
-
-      model.findById(id).then(seat => {
-
-        server
-          .put(`/gameofthrones/seat/${id}/house`)
-          .send(data)
-          .expect(200)
-          .end((err, res) => {
-
-            if (err) return done(err)
-            let body = res.body
-            assert('object' === typeof body)
-            debug(body)
-            assert(body.id === seat.house_id)
-            test.assertObject(body, data)
-            test.assertModelById(association, seat.house_id, data, done)
-
-          })
-
-      }).catch(done)
-
-    })
-    
-    it ('should return 201 | put /seat/:id/house', function (done) {
-
-      const id = 2
-      const data = {
-        name: uuid()
-      }
-
-      model.findById(id).then(seat => {
-        return association.destroy({
-          where: {
-            id: seat.house_id
-          }
-        }).then((row) => {
-          assert(row)
-          return seat
-        })
-      }).then(seat => {
-
-        server
-          .put(`/gameofthrones/seat/${id}/house`)
-          .send(data)
-          .expect(201)
-          .end((err, res) => {
-
-            if (err) return done(err)
-            let body = res.body
-            assert('object' === typeof body)
-            debug(body)
-
-            model.findById(id).then(seat => {
-              assert(body.id === seat.house_id)
-              test.assertObject(body, data)
-              test.assertModelById(association, seat.house_id, data, done)
-            })
-
-          })
-
-      }).catch(done)
-
-    })
-
-    it ('should return 204 | delete /seat/:id/house', function (done) {
+    it ('should return 204 | delete /house/:id/seat', function (done) {
 
       const id = 2
 
-      model.findById(id).then(seat => {
-        return association.findById(seat.house_id).then(house => {
-          assert(house)
-          return seat
-        })
+      association.find({
+        where: {
+          house_id: id
+        }
       }).then(seat => {
+        assert(seat)
+        return model.findById(id)
+      }).then(house => {
 
         server
-          .del(`/gameofthrones/seat/${id}/house`)
+          .del(`/gameofthrones/house/${id}/seat`)
           .expect(204)
           .end((err, res) => {
 
-            association.findById(seat.house_id).then(data => {
+            association.find({
+              where: {
+                house_id: id
+              },
+            }).then(data => {
               assert(!data)
               done()
             })
@@ -221,6 +183,29 @@ describe ('model association routers', function () {
       }).catch(done)
 
     })
+
+    it ('should return 404 | delete /house/:id/seat', function (done) {
+
+      const id = 2
+
+      association.destroy({
+        where: {
+          house_id: id
+        }
+      }).then(row => {
+        assert(row)
+        return model.findById(id)
+      }).then(house => {
+
+        server
+          .del(`/gameofthrones/house/${id}/seat`)
+          .expect(404)
+          .end(done)
+
+      }).catch(done)
+
+    })
+
   })
 
 })

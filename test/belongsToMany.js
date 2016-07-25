@@ -14,7 +14,7 @@ const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
 
-describe.only ('model belongsToMany association routers', function () {
+describe ('model belongsToMany association routers', function () {
 
   let server
 
