@@ -110,7 +110,7 @@ describe ('model hasOne association routers', function () {
 
     })
 
-    it.only ('should return 200 | put /house/:id/seat, restore from destroyed', function (done) {
+    it ('should return 200 | put /house/:id/seat, restore from destroyed', function (done) {
 
       const id = 2
       const data = {
@@ -138,7 +138,7 @@ describe ('model hasOne association routers', function () {
             debug(body)
             assert(body.house_id === id)
             test.assertObject(body, data)
-            test.assertModelById(association, body.house_id, data, done)
+            test.assertModelById(association, body.id, data, done)
 
           })
 
@@ -146,6 +146,42 @@ describe ('model hasOne association routers', function () {
 
     })
 
+    it ('should return 201 | put /house/:id/seat', function (done) {
+
+      const id = 2
+      const data = {
+        name: uuid()
+      }
+
+      association.destroy({
+        where: {
+          house_id: id
+        },      
+        force: true
+      }).then((row) => {
+        assert(row)
+        return model.findById(id)
+      }).then(house => {
+
+        server
+          .put(`/gameofthrones/house/${id}/seat`)
+          .send(data)
+          .expect(201)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert('object' === typeof body)
+            debug(body)
+            assert(body.house_id === id)
+            test.assertObject(body, data)
+            test.assertModelById(association, body.id, data, done)
+
+          })
+
+      }).catch(done)
+
+    })
 
   })
 
