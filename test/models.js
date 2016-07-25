@@ -53,7 +53,7 @@ describe ('model routers', function () {
           assert(Array.isArray(body))
           debug(body)
           assert(body.length === 2)
-          done();
+          done()
 
         })
 
@@ -71,14 +71,74 @@ describe ('model routers', function () {
         .send(data)
         .expect(201)
         .end((err, res) => {
-          if (err) return done(err);
-          let body = res.body;
-          assert(typeof body === 'object');
-          debug(body);
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
 
           test.assertObject(body, data)
           test.assertModelById(model, body.id, data, done).catch(done)
         })
+    })
+
+    it ('should return 201 | post /user, object body, with object include', function (done) {
+
+      const data = {
+        name     : 'Li Xin',
+        nickname : 'xt',
+        characters: { name: uuid() }
+      }
+
+      server
+        .post(`/user`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
+          assert(body.id)
+          assert(Array.isArray(body.characters))
+          assert(body.characters)
+
+          delete data.characters
+
+          test.assertObject(body, data)
+          test.assertModelById(model, body.id, data, done).catch(done)
+        })
+
+    })
+
+    it ('should return 201 | post /user, object body, with array include', function (done) {
+
+      const data = {
+        name     : 'Li Xin',
+        nickname : 'xt',
+        characters: [
+          { name: uuid() }
+        ]
+      }
+
+      server
+        .post(`/user`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
+          assert(body.id)
+          assert(Array.isArray(body.characters))
+          assert(body.characters)
+
+          delete data.characters
+
+          test.assertObject(body, data)
+          test.assertModelById(model, body.id, data, done).catch(done)
+        })
+
     })
 
     it ('should return 201 | post /user, array body', function (done) {
@@ -122,10 +182,10 @@ describe ('model routers', function () {
         .send(data)
         .expect(201)
         .end((err, res) => {
-          if (err) return done(err);
-          let body = res.body;
-          assert(typeof body === 'object');
-          debug(body);
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
 
           test.assertObject(body, data) 
           test.assertModelById(model, body.id, data, done).catch(done)
@@ -150,10 +210,10 @@ describe ('model routers', function () {
           .send(data)
           .expect(200)
           .end((err, res) => {
-            if (err) return done(err);
-            let body = res.body;
-            assert(typeof body === 'object');
-            debug(body);
+            if (err) return done(err)
+            let body = res.body
+            assert(typeof body === 'object')
+            debug(body)
 
             test.assertObject(body, data) 
             test.assertModelById(model, body.id, data, done).catch(done)
@@ -285,23 +345,23 @@ describe ('model routers', function () {
           })
         }).then(data => {
 
-          data = data.dataValues;
+          data = data.dataValues
           delete data.created_at
           delete data.updated_at
           delete data.deleted_at
 
           data.nickname = uuid()
-          debug(data);
+          debug(data)
 
           server
             .post(`/user`)
             .send(data)
             .expect(201)
             .end((err, res) => {
-              if (err) return done(err);
-              let body = res.body;
-              assert(typeof body === 'object');
-              debug(body);
+              if (err) return done(err)
+              let body = res.body
+              assert(typeof body === 'object')
+              debug(body)
 
               test.assertObject(body, data)
               test.assertModelById(model, body.id, data, done).catch(done)
@@ -350,8 +410,8 @@ describe ('model routers', function () {
             .send(data)
             .expect(201)
             .end((err, res) => {
-              if (err) return done(err);
-              let body = res.body;
+              if (err) return done(err)
+              let body = res.body
               assert(Array.isArray(body))
               debug(body)
 
@@ -372,18 +432,18 @@ describe ('model routers', function () {
 
     it ('should return 200 | get /user/:id', function (done) {
 
-      const id = 1;
+      const id = 1
 
       server
         .get(`/user/${id}`)
         .expect(200)
         .end((err, res) => {
-          if (err) return done(err);
-          let body = res.body;
-          assert(typeof body === 'object');
-          debug(body);
-          assert(body.id === id);
-          done();
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
+          assert(body.id === id)
+          done()
         })
     })
 
@@ -505,23 +565,23 @@ describe ('model routers', function () {
           })
         }).then(data => {
 
-          data = data.dataValues;
+          data = data.dataValues
           delete data.created_at
           delete data.updated_at
           delete data.deleted_at
 
           data.rate = 0
-          debug(data);
+          debug(data)
 
           server
             .post(`/user_characters`)
             .send(data)
             .expect(201)
             .end((err, res) => {
-              if (err) return done(err);
-              let body = res.body;
-              assert(typeof body === 'object');
-              debug(body);
+              if (err) return done(err)
+              let body = res.body
+              assert(typeof body === 'object')
+              debug(body)
 
               test.assertObject(body, data)
               test.assertModelById(model, id, data, done)
@@ -573,8 +633,8 @@ describe ('model routers', function () {
             .send(data)
             .expect(201)
             .end((err, res) => {
-              if (err) return done(err);
-              let body = res.body;
+              if (err) return done(err)
+              let body = res.body
               assert(Array.isArray(body))
               debug(body)
 
@@ -613,7 +673,7 @@ describe ('model routers', function () {
             assert(Array.isArray(body))
             debug(body)
             assert(body.length === count)
-            done();
+            done()
 
           })
         }).catch(done)
