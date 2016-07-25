@@ -20,6 +20,7 @@ const assertModelById = (model, id, expect, done) => {
   
   assert(id)
   return model.findById(id).then(res => {
+    assert(res)
     assertObject(res.dataValues, expect)
     if (done) done()
   })
