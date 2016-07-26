@@ -36,7 +36,7 @@ GET /user
 
 If you just have one database table and sequelize model both named `user`, just choose [the right HTTP method][9] to visit path as exactly same name as it.
 
-Using `querystring` in your url can add condition or limit for the request. For more details, read about [`querystring`][2]
+Using `querystring` in your url can add condition or limit for the request. For more details, read about [`querystring`][2].
 
 ### List
 
