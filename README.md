@@ -306,7 +306,7 @@ There are at least 2 ways to implement the `Access Control`:
 1. Add another middleware before request be handled by RestQL.
 2. Add options on `sequelize#model#associations`, RestQL will handle the options.
 
-This document will only talk about the 2nd way,. And the option was only support with associations, not with models.
+This document will only talk about the 2nd way. And the option was only support with associations, not with models.
 
 1. To specify which association should not be accessed by RestQL, add `ignore` option. Example:
 
