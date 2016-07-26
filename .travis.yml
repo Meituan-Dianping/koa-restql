@@ -3,17 +3,8 @@ language: node_js
 node_js:
   - stable
 
-dist: trusty
-sudo: required
-addons:
-  apt:
-    packages:
-      - mysql-server-5.6
-      - mysql-client-core-5.6
-      - mysql-client-5.6
-
 before_script:
-  - mysql -u root -e 'create database koa-restql-test;'
+  - mysql -u root -e 'create database test;'
 
 env:
- - TEST_DB="mysql://root@localhost/koa-restql-test#UT8"
+ - TEST_DB="mysql://root@localhost/test#UT8"
