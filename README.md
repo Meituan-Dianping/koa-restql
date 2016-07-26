@@ -312,9 +312,8 @@ This document will only talk about the 2nd way,. And the option was only support
 
     ```js
     models.user.hasOne(
-      user,
+      models.privacy,
       {
-        as: 'privacy',
         restql: {
           ignore: true
         }
@@ -326,9 +325,8 @@ This document will only talk about the 2nd way,. And the option was only support
 
     ```js
     models.user.hasOne(
-      user,
+      models.privacy,
       {
-        as: 'privacy',
         restql: {
           ignore: ['get']
         }
