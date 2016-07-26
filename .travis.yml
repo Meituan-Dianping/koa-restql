@@ -7,4 +7,4 @@ before_script:
   - mysql -u root -e 'create database test;'
 
 env:
- - TEST_DB="mysql://root@localhost/test#UT8"
+  - TEST_DB="mysql://root@localhost/test#UT8"
