@@ -1,0 +1,10 @@
+language: node_js
+
+node_js:
+  - stable
+
+before_script:
+  - mysql -u root -e 'create database test;'
+
+env:
+  - TEST_DB="mysql://root@localhost/test#UT8"
