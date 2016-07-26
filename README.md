@@ -1,5 +1,8 @@
 # koa-restql
 
+[![Travis branch](https://img.shields.io/travis/Meituan-Dianping/koa-restql/master.svg?maxAge=2592000)]()
+[![npm](https://img.shields.io/npm/v/koa-restql.svg?maxAge=2592000)]()
+
 Build **real** RESTful APIs without writing one line of code. Cool, right?
 
 Now it works perfectly with MySQL.
