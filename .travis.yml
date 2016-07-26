@@ -4,7 +4,7 @@ node_js:
   - stable
 
 before_script:
-  - mysql -u root -e 'create database koa-restql-test;'
+  - mysql -e 'create database koa-restql-test;'
 
 env:
  - TEST_DB="mysql://root@localhost/koa-restql-test#UT8"
