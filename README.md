@@ -200,7 +200,7 @@ GET /user?_include%5B0%5D=friends
 
 ### CRUD
 
-RestQL could do every CRUD options for you. Just choose the right HTTP method to access either the resource or the association path.
+RestQL could do all CRUD operations for you. Just choose the right HTTP method to access either the resource or the association path.
 
 Supported HTTP verbs:
 
