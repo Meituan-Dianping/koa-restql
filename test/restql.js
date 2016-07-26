@@ -1,29 +1,29 @@
 'use strict'
 
-const RestQL = require('../lib/RestQL');
-const common = require('./lib/common');
+const assert  = require('assert');
+const debug   = require('debug')('koa-restql:test:restql')
 
-const qs      = common.qs;
-const koa     = common.koa;
-const util    = common.util;
-const http    = common.http;
-const Router  = common.Router;
-const assert  = common.assert;
-const request = common.request;
-const models  = common.sequelize.models;
-const debug   = common.debug('koa-restql:test:restql');
+const RestQL  = require('../lib/RestQL')
+const prepare = require('./lib/prepare')
+
+const models  = prepare.sequelize.models;
 
 describe ('RestQL', function () {
-  it ('should create new Restql', function (done) {
+
+  it ('should create a Restql instance | new RestQL(models)', function () {
    
-    let restql = new RestQL(models);
-    assert(restql instanceof RestQL);
+    const restql = new RestQL(models)
+    assert(restql instanceof RestQL)
 
-    restql = null;
-    restql = RestQL(models);
-    assert(restql instanceof RestQL);
-
-    done();
   })
+
+
+  it ('should create a Restql instance | RestQL(models)', function () {
+   
+    const restql = RestQL(models)
+    assert(restql instanceof RestQL)
+
+  })
+
 })
 

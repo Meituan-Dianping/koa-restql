@@ -3,16 +3,25 @@
 module.exports.attributes = (DataTypes) => {
 
   return {
-    id : {
+    id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },   
-    login : {
-      type: DataTypes.STRING,
+
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      defaultValue: ''
     }, 
-    email : DataTypes.STRING,
-    deleted_at : {
+
+    nickname: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      defaultValue: ''
+    }, 
+
+    deleted_at: {
       type: DataTypes.DATE,
       allowNull: false,
       /**
@@ -22,36 +31,59 @@ module.exports.attributes = (DataTypes) => {
        */
       defaultValue: new Date(0)
     }
-  };
+  }
 }
 
 module.exports.options = {
 
   indexes: [{
     type: 'unique',
-    name: 'user_login_unique',
-    fields: ['login']
+    /* Name is important for unique index */
+    name: 'user_name_unique',
+    fields: ['name']
   }],
 
   classMethods: {
     associate: (models) => {
 
-      models.user.hasOne(models.profile, {
-        as: 'profile',
-        constraints: false
-      });
-
-      models.user.hasMany(models.department, {
-        as: 'departments',
-        constraints: false
-      });
-
-      models.user.belongsToMany(models.tag, {
-        as: 'tags',
+      models.user.belongsToMany(models.character, {
+        as: 'characters',
         constraints: false,
-        through:  models.user_tags,
+        through:  {
+          model: models.user_characters,
+        },
         foreignKey: 'user_id',
-        otherKey: 'tag_id',
+        otherKey: 'character_id'
+      })
+
+      models.user.belongsToMany(models.character, {
+        as: 'partialities',
+        constraints: false,
+        through:  {
+          model: models.user_characters,
+          scope: {
+            rate: {
+              $gt: 0
+            }
+          }
+        },
+        foreignKey: 'user_id',
+        otherKey: 'character_id'
+      })
+
+      models.user.belongsToMany(models.character, {
+        as: 'pests',
+        constraints: false,
+        through:  {
+          model: models.user_characters,
+          scope: {
+            rate: {
+              $lte: 0
+            }
+          }
+        },
+        foreignKey: 'user_id',
+        otherKey: 'character_id'
       })
     }
   }
