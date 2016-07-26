@@ -340,6 +340,10 @@ This document will only talk about the 2nd way,. And the option was only support
 npm test
 ```
 
+## License
+
+MIT
+
 [1]: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 [2]: #querystring
 [3]: https://github.com/sequelize/sequelize/blob/master/docs/api/associations/has-one.md
