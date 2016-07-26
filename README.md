@@ -232,11 +232,6 @@ PUT       | Array/Object | Object |
 
 ***Note***: `PUT` method must be used with `unique key(s)`, which means you can not use `PUT` method with a request body without an `unique key`.
 
-***Note***: At the moment, we have not implemented the following operations:
-
-* Delete a list.
-* Create/Update a list
-
 To use `POST` or `PUT` method, you should put data into request body. Example:
 
 ```
