@@ -3,11 +3,5 @@ language: node_js
 node_js:
   - stable
 
-services:
-  - mysql
-
-before_script:
-  - mysql -e 'create database koa-restql-test;'
-
 env:
- - TEST_DB="mysql://root@localhost/koa-restql-test#UT8"
+ - TEST_DB="mysql://travis@localhost/test#UT8"
