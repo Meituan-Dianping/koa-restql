@@ -1,7 +1,7 @@
 # koa-restql
 
-[![Travis branch](https://img.shields.io/travis/Meituan-Dianping/koa-restql/master.svg?maxAge=2592000)]()
-[![npm](https://img.shields.io/npm/v/koa-restql.svg?maxAge=2592000)]()
+[![Travis branch][travis-image]][travis-url]
+[![NPM version][npm-image]][npm-url]
 
 Build **real** RESTful APIs without writing one line of code. Cool, right?
 
@@ -347,6 +347,10 @@ npm test
 
 MIT
 
+[travis-image]: https://img.shields.io/travis/Meituan-Dianping/koa-restql/master.svg?maxAge=2592000
+[travis-url]: https://travis-ci.org/Meituan-Dianping/koa-restql
+[npm-image]: https://img.shields.io/npm/v/koa-restql.svg?maxAge=2592000
+[npm-url]: https://www.npmjs.com/package/koa-restql
 [1]: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 [2]: #querystring
 [3]: https://github.com/sequelize/sequelize/blob/master/docs/api/associations/has-one.md
