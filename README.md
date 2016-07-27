@@ -346,6 +346,7 @@ npm test
 ## License
 
 MIT
+
 [travis-image]: https://img.shields.io/travis/Meituan-Dianping/koa-restql/master.svg?maxAge=2592000
 [travis-url]: https://travis-ci.org/Meituan-Dianping/koa-restql
 [npm-image]: https://img.shields.io/npm/v/koa-restql.svg?maxAge=2592000
