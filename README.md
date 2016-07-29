@@ -18,8 +18,8 @@ npm install --save koa-restql
 ## Usage
 
 ```js
-const koa       = require('koa')
-const RestQL    = require('koa-restql')
+const koa     = require('koa')
+const RestQL  = require('koa-restql')
 
 let app = koa()
 let restql = new RestQL(sequelize.models) // Build APIs from `sequelize.models`
