@@ -50,7 +50,7 @@ Using `querystring` in your url can add condition or limit for the request. For 
 
     ```
     HTTP/1.1 206 Partial Content
-    X-Range:items 0-2/10
+    X-Range: items 0-2/10
     ```
 
     ```
