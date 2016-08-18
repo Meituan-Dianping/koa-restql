@@ -278,7 +278,7 @@ describe ('include', function () {
 
   })
 
-  it.only ('should return 200 | get /house, include members, with require = false', function (done) {
+  it ('should return 200 | get /house, include members, with require = false', function (done) {
 
     const user = {
       name: uuid()
@@ -377,11 +377,9 @@ describe ('include', function () {
         assert(Array.isArray(body))
         debug(body)
 
-        body.forEach(row => {
-          assert(row.id)
-          assert(Array.isArray(row.members))
-          assert(row.seat)
-        })
+        assert(body.some(row => {
+          return row.id && Array.isArray(row.members) && row.seat
+        }))
 
         done()
 

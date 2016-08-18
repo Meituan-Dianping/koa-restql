@@ -14,7 +14,7 @@ const RestQL  = require('../lib/RestQL')
 
 const models  = prepare.sequelize.models
 
-describe.skip ('subQuery', function () {
+describe ('subQuery', function () {
 
   let server
 
@@ -37,37 +37,35 @@ describe.skip ('subQuery', function () {
 
   })
 
-  it ('should return 200 | get /seat, include house, subQuery = undefined', function (done) {
-
-    const limit = 4
+  it ('should return 200 | get /seat, include house, subQuery = 0', function (done) {
 
     const querystring = qs.stringify({
       _attributes: ['id'],
       _include: [{
         attributes: ['id', 'house_id'],
         association: 'members',
-        required: 1,
-        subQuery: 0
-      }, {
-        attributes: ['id', 'house_id'],
-        association: 'seat',
-        required: 1
+        include: [{
+          attributes: ['id'],
+          association: 'reviewers'
+        }]
       }],
-      _limit: limit
+      _distinct: 1,
+      _subQuery: 0
     })
 
     server
       .get(`/gameofthrones/house?${querystring}`)
       .expect(200)
-      //.expect('X-Range', `objects 0-${limit}/5`)
+      .expect('X-Range', `objects 0-5/5`)
       .end((err, res) => {
 
+        debug(res.headers)
         if (err) return done(err)
         let body = res.body
         assert(Array.isArray(body))
         debug(body)
 
-        assert(body.length === 4)
+        assert(body.length === 5)
 
         done()
 
