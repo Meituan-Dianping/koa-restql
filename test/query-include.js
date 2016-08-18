@@ -85,6 +85,9 @@ describe ('include', function () {
         body.forEach(row => {
           assert(row.id)
           assert(Array.isArray(row.characters))
+          row.characters.forEach(character => {
+            assert(character.user_characters)
+          })
         })
 
         done()
