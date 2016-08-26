@@ -158,7 +158,7 @@ describe ('pagination', function () {
         return model.create({
           name: uuid()
         }).then(house => {
-          createMockData(association, ['name'], count, {
+          return createMockData(association, ['name'], count, {
             house_id: house.id
           })
         })
