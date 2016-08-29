@@ -85,6 +85,9 @@ describe ('include', function () {
         body.forEach(row => {
           assert(row.id)
           assert(Array.isArray(row.characters))
+          row.characters.forEach(character => {
+            assert(character.user_characters)
+          })
         })
 
         done()
@@ -235,7 +238,7 @@ describe ('include', function () {
 
   })
 
-  it ('should return 200 | get /user, include characters, with require = true', function (done) {
+  it ('should return 200 | get /house, include members, with require = true', function (done) {
 
     const user = {
       name: uuid()
@@ -243,31 +246,68 @@ describe ('include', function () {
 
     const querystring = qs.stringify({
       _include: [{
-        association: 'characters',
+        association: 'members',
         required: 1
-      }]
+      }],
+      // it is important
+      _distinct: 1
     })
 
     models.user.create(user).then(user => {
 
       server
-        .get(`/user?${querystring}`)
+        .get(`/gameofthrones/house?${querystring}`)
         .expect(200)
+        .expect('X-Range', 'objects 0-4/4')
         .end((err, res) => {
 
           if (err) return done(err)
           let body = res.body
+          debug(res.headers)
           assert(Array.isArray(body))
           debug(body)
 
           body.forEach(row => {
             assert(row.id)
-            assert(row.id !== user.id)
-            assert(Array.isArray(row.characters))
-            row.characters.forEach(character => {
-              debug(character)
-            })
+            assert(Array.isArray(row.members))
+            assert(row.members.length)
           })
+
+          done()
+
+        })
+       
+    }).catch(done)
+
+  })
+
+  it ('should return 200 | get /house, include members, with require = false', function (done) {
+
+    const user = {
+      name: uuid()
+    }
+
+    const querystring = qs.stringify({
+      _include: [{
+        association: 'members',
+      }],
+      // it is important
+      _distinct: 1
+    })
+
+    models.user.create(user).then(user => {
+
+      server
+        .get(`/gameofthrones/house?${querystring}`)
+        .expect(200)
+        .expect('X-Range', 'objects 0-5/5')
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          debug(res.headers)
+          assert(Array.isArray(body))
+          debug(body)
 
           done()
 
@@ -321,52 +361,6 @@ describe ('include', function () {
 
   })
   
-  it ('should return 200 | get /user, include characters, with where, with required = false', function (done) { 
-    
-    const user = { name: uuid() }
-
-    const querystring = qs.stringify({
-      _include: [{
-        association: 'characters',
-        where: {
-          house_id: 1  
-        },
-        require: 0
-      }]
-    })
-
-    models.user.create(user).then(user => {
-
-      server
-        .get(`/user?${querystring}`)
-        .expect(200)
-        .end((err, res) => {
-
-          if (err) return done(err)
-          let body = res.body
-          assert(Array.isArray(body))
-          debug(body)
-
-          assert(body.some(row => row.id === user.id))
-
-          body.forEach(row => {
-            assert(row.id)
-            if (row.characters) {
-              assert(Array.isArray(row.characters))
-              row.characters.forEach(character => {
-                debug(character)
-                assert(character.house_id === 1)
-            })
-            }
-          })
-
-          done()
-
-        })
-       
-    }).catch(done)
-
-  })
 
   it ('should return 200 | get /house, include seat and characters', function (done) {
 
@@ -386,11 +380,66 @@ describe ('include', function () {
         assert(Array.isArray(body))
         debug(body)
 
-        body.forEach(row => {
-          assert(row.id)
-          assert(Array.isArray(row.members))
-          assert(row.seat)
-        })
+        assert(body.some(row => {
+          return row.id && Array.isArray(row.members) && row.seat
+        }))
+
+        done()
+
+      })
+
+  })
+
+  it ('should return 200 | get /user/:id/characters, include house', function (done) {
+
+    const id = 1
+
+    const querystring = qs.stringify({
+      _include: [
+        'house'
+      ]
+    })
+
+    server
+      .get(`/user/${id}/characters?${querystring}`)
+      .expect(200)
+      .end((err, res) => {
+
+        if (err) return done(err)
+        let body = res.body
+        assert(Array.isArray(body))
+        debug(body)
+
+        assert(body.every(row => row.id && row.house))
+
+        done()
+
+      })
+
+  })
+
+  it ('should return 200 | get /seat/:id/house, include members', function (done) {
+
+    const id = 1
+
+    const querystring = qs.stringify({
+      _include: [
+        'members'
+      ]
+    })
+
+    server
+      .get(`/gameofthrones/seat/${id}/house?${querystring}`)
+      .expect(200)
+      .end((err, res) => {
+
+        if (err) return done(err)
+        let body = res.body
+        debug(body)
+
+        assert(body.id)
+        assert(body.members) 
+        assert(Array.isArray(body.members))
 
         done()
 

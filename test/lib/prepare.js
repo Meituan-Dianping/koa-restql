@@ -3,6 +3,7 @@
 const fs        = require('fs')
 const util      = require('util')
 const path      = require('path')
+const uuid      = require('node-uuid')
 const debug     = require('debug')('sequelize')
 const Sequelize = require('sequelize')
 
@@ -118,6 +119,22 @@ Object.keys(models).forEach(key => {
     associations: [${Object.keys(model.associations).join()}]`)
 })
 
+const createMockData = (model, attributes, count, defaultValues) => {
+
+  const data = []
+
+    for (let i = 0; i < count; i ++) {
+      let row = {}
+      attributes.forEach(attribute => row[attribute] = uuid())
+        Object.assign(row, defaultValues || {})
+        data.push(row)
+    }
+
+  return model.bulkCreate(data)
+
+}
+
+
 module.exports = {
-  sequelize, loadMockData, reset
+  sequelize, loadMockData, reset, createMockData
 }
