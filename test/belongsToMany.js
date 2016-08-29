@@ -877,7 +877,7 @@ describe ('model belongsToMany association routers', function () {
       const id = 1
 
       const where = {
-        house_id: 4
+        house_id: 5
       }
 
       const querystring = qs.stringify(where)

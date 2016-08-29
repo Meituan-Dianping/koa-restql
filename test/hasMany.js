@@ -727,6 +727,7 @@ describe ('model hasMany association routers', function () {
             if (err) return done(err)
 
             house.getMembers().then(members => {
+              debug(members)
               assert(!members.length)    
               done()
             })
