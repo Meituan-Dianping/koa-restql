@@ -12,7 +12,11 @@ const test    = require('./lib/test')
 const prepare = require('./lib/prepare')
 const RestQL  = require('../lib/RestQL')
 
-const models  = prepare.sequelize.models
+const {
+  sequelize, createMockData
+}  = prepare
+
+const models = sequelize.models
 
 describe ('pagination', function () {
 
@@ -27,21 +31,6 @@ describe ('pagination', function () {
     server = request(http.createServer(app.callback()))
 
   })
-
-  const createMockData = (model, attributes, count, defaultValues) => {
-
-    const data = []
-
-    for (let i = 0; i < count; i ++) {
-      let row = {}
-      attributes.forEach(attribute => row[attribute] = uuid())
-      Object.assign(row, defaultValues || {})
-      data.push(row)
-    }
-
-    return model.bulkCreate(data)
-
-  }
 
   describe ('model', function () {
 

@@ -418,4 +418,33 @@ describe ('include', function () {
 
   })
 
+  it ('should return 200 | get /seat/:id/house, include members', function (done) {
+
+    const id = 1
+
+    const querystring = qs.stringify({
+      _include: [
+        'members'
+      ]
+    })
+
+    server
+      .get(`/gameofthrones/seat/${id}/house?${querystring}`)
+      .expect(200)
+      .end((err, res) => {
+
+        if (err) return done(err)
+        let body = res.body
+        debug(body)
+
+        assert(body.id)
+        assert(body.members) 
+        assert(Array.isArray(body.members))
+
+        done()
+
+      })
+
+  })
+
 })
