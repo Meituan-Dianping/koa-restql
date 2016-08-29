@@ -390,4 +390,32 @@ describe ('include', function () {
 
   })
 
+  it ('should return 200 | get /user/:id/characters, include house', function (done) {
+
+    const id = 1
+
+    const querystring = qs.stringify({
+      _include: [
+        'house'
+      ]
+    })
+
+    server
+      .get(`/user/${id}/characters?${querystring}`)
+      .expect(200)
+      .end((err, res) => {
+
+        if (err) return done(err)
+        let body = res.body
+        assert(Array.isArray(body))
+        debug(body)
+
+        assert(body.every(row => row.id && row.house))
+
+        done()
+
+      })
+
+  })
+
 })
