@@ -1,4 +1,4 @@
 module.exports = {
-  db: "mysql://koa-restql-test:test@localhost/koa-restql-test#UT8"
+  db: "mysql://koa-restql-test:test@localhost/koa-restql-test#UTF8"
 }
 
