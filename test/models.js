@@ -81,7 +81,7 @@ describe ('model routers', function () {
         })
     })
 
-    it ('should return 201 | post /user, object body, with object include', function (done) {
+    it ('should return 201 | post /user, object body, with object include create new character', function (done) {
 
       const data = {
         name     : 'Li Xin',
@@ -107,6 +107,27 @@ describe ('model routers', function () {
           test.assertObject(body, data)
           test.assertModelById(model, body.id, data, done).catch(done)
         })
+
+    })
+
+    it ('should return 409 | post /user, object body, with object include', function (done) {
+
+      models.character.findAll().then(res => {
+
+        return {
+          name     : 'Li Xin',
+          nickname : 'xt',
+          characters: res[0]
+        }
+      }).then(data => {
+
+        server
+          .post(`/user`)
+          .send(data)
+          .expect(409)
+          .end(done)
+
+      })
 
     })
 
