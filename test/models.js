@@ -213,7 +213,7 @@ describe ('model routers', function () {
         })
     })
 
-    it.only ('should return 201 | put /user, object body, without name', function (done) {
+    it ('should return 201 | put /user, object body, without name', function (done) {
 
       const data = {
         nickname : 'xt',
