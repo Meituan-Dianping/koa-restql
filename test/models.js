@@ -213,6 +213,29 @@ describe ('model routers', function () {
         })
     })
 
+    it.only ('should return 201 | put /user, object body, without name', function (done) {
+
+      const data = {
+        nickname : 'xt',
+        characters: []
+      }
+
+      server
+        .put(`/user`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
+
+          delete data.characters
+          test.assertObject(body, data) 
+          test.assertModelById(model, body.id, data, done).catch(done)
+        })
+    })
+
     it ('should return 200 | put /user, object body', function (done) {
 
       const id = 2
