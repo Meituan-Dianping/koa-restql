@@ -81,7 +81,7 @@ describe ('model routers', function () {
         })
     })
 
-    it ('should return 201 | post /user, object body, with object include', function (done) {
+    it ('should return 201 | post /user, object body, with object include create new character', function (done) {
 
       const data = {
         name     : 'Li Xin',
@@ -107,6 +107,24 @@ describe ('model routers', function () {
           test.assertObject(body, data)
           test.assertModelById(model, body.id, data, done).catch(done)
         })
+
+    })
+
+    it ('should return 409 | post /user, object body, with object include', function (done) {
+
+      models.character.findAll().then(res => ({
+        name     : 'Li Xin',
+        nickname : 'xt',
+        characters: res[0]
+      })).then(data => {
+
+        server
+          .post(`/user`)
+          .send(data)
+          .expect(409)
+          .end(done)
+
+      })
 
     })
 
@@ -187,6 +205,29 @@ describe ('model routers', function () {
           assert(typeof body === 'object')
           debug(body)
 
+          test.assertObject(body, data) 
+          test.assertModelById(model, body.id, data, done).catch(done)
+        })
+    })
+
+    it ('should return 201 | put /user, object body, without name', function (done) {
+
+      const data = {
+        nickname : 'xt',
+        characters: []
+      }
+
+      server
+        .put(`/user`)
+        .send(data)
+        .expect(201)
+        .end((err, res) => {
+          if (err) return done(err)
+          let body = res.body
+          assert(typeof body === 'object')
+          debug(body)
+
+          delete data.characters
           test.assertObject(body, data) 
           test.assertModelById(model, body.id, data, done).catch(done)
         })
