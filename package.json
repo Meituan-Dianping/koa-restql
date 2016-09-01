@@ -1,6 +1,6 @@
 {
   "name": "koa-restql",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Koa RESTful API middleware based on Sequlizejs",
   "main": "lib/RestQL.js",
   "files": [
