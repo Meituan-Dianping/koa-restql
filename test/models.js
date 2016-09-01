@@ -112,14 +112,11 @@ describe ('model routers', function () {
 
     it ('should return 409 | post /user, object body, with object include', function (done) {
 
-      models.character.findAll().then(res => {
-
-        return {
-          name     : 'Li Xin',
-          nickname : 'xt',
-          characters: res[0]
-        }
-      }).then(data => {
+      models.character.findAll().then(res => ({
+        name     : 'Li Xin',
+        nickname : 'xt',
+        characters: res[0]
+      })).then(data => {
 
         server
           .post(`/user`)
