@@ -16,6 +16,7 @@
   "dependencies": {
     "koa-router": "^5.3.0",
     "co-body": "^4.0.0",
+    "lodash": "^4.15.0",
     "qs": "^6.2.0",
     "debug": "^2.2.0"
   },
