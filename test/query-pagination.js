@@ -133,6 +133,100 @@ describe ('pagination', function () {
 
   })
 
+  describe ('model with plural association, with include', function () {
+
+    beforeEach (function (done) {
+
+      debug('reset db')
+      prepare.loadMockData().then(() => {
+        done()
+      }).catch(done)  
+
+    })
+
+    it ('should return 206 | get /house include members', function (done) {
+
+      const model       = models.house
+      const association = models.character
+
+      const querystring = qs.stringify({
+        _include: [{
+          association: 'members',
+        }]
+      })
+
+      server
+        .get(`/gameofthrones/house?${querystring}`)
+        .expect(200)
+        .expect('X-Range', 'objects 0-5/5')
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          debug(body)
+          done()
+
+        })
+
+    })
+
+    it ('should return 206 | get /house/:id/members include reviewers', function (done) {
+
+      const id = 1
+
+      const querystring = qs.stringify({
+        _include: [{
+          association: 'reviewers',
+        }]
+      })
+
+      server
+        .get(`/gameofthrones/house/1/members?${querystring}`)
+        .expect(200)
+        .expect('X-Range', 'objects 0-2/2')
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          debug(body)
+          done()
+
+        })
+
+    })
+
+    it ('should return 206 | get /user/:id/character include reviewers', function (done) {
+
+      const id = 1
+
+      const querystring = qs.stringify({
+        _attributes: ['id'],
+        _include: [{
+          association: 'reviewers',
+        }]
+      })
+
+      server
+        .get(`/user/1/characters?${querystring}`)
+        .expect(200)
+        .expect('X-Range', 'objects 0-4/4')
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          assert(body.length === 4)
+          debug(body)
+          done()
+
+        })
+
+    })
+
+  })
+
   describe ('model with association', function () {
 
     const model       = models.house
