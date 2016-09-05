@@ -62,7 +62,7 @@ describe ('group', function () {
 
   })
 
-  it.only ('should return 200 | get /character, group = house_id, with count', function (done) {
+  it ('should return 200 | get /character, group = house_id, with count', function (done) {
 
     const querystring = qs.stringify({
       _attributes: [
