@@ -66,6 +66,31 @@ describe ('model hasMany association routers', function () {
 
     })
 
+    it ('should return 200 | get /house/:id/bastards', function (done) {
+
+      const id = 1
+
+      model.findById(id).then(data => {
+
+        server
+          .get(`/gameofthrones/house/${id}/bastards`)
+          .expect(200)
+          .end((err, res) => {
+
+            if (err) return done(err)
+            let body = res.body
+            assert(Array.isArray(body))
+            debug(body)
+            assert(body.length === 1)
+            assert(body[0].is_bastard) 
+            done()
+
+          })
+
+      }).catch(done)
+
+    })
+
     it ('should return 404 | get /house/:id/members', function (done) {
 
       const id = 100

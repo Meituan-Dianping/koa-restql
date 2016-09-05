@@ -1,6 +1,7 @@
 'use strict';
 
 const fs        = require('fs')
+const _         = require('lodash')
 const util      = require('util')
 const path      = require('path')
 const uuid      = require('node-uuid')
@@ -126,7 +127,7 @@ const createMockData = (model, attributes, count, defaultValues) => {
     for (let i = 0; i < count; i ++) {
       let row = {}
       attributes.forEach(attribute => row[attribute] = uuid())
-        Object.assign(row, defaultValues || {})
+        _.assign(row, defaultValues || {})
         data.push(row)
     }
 
