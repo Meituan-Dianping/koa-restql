@@ -131,6 +131,30 @@ describe ('pagination', function () {
 
     })
 
+    it ('should return 200 | get /user, _limit = null', function (done) {
+
+      const querystring = qs.stringify({
+        _limit: null
+      }, {
+        strictNullHandling : true
+      })
+
+      server
+        .get(`/user?${querystring}`)
+        .expect(200)
+        .end((err, res) => {
+
+          if (err) return done(err)
+          let body = res.body
+          assert(Array.isArray(body))
+          debug(body)
+          assert(body.length === count)
+          done()
+
+        })
+
+    })
+
   })
 
   describe ('model with plural association, with include', function () {
