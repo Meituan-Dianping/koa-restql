@@ -56,6 +56,14 @@ module.exports.options = {
         as: 'members',
         constraints: false
       })
+
+      models.house.hasMany(models.character, {
+        as: 'bastards',
+        constraints: false,
+        scope: {
+          is_bastard: true
+        }
+      })
     }
   }
 }
