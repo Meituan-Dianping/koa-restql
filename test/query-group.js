@@ -54,11 +54,7 @@ describe ('group', function () {
         let body = res.body
         assert(Array.isArray(body))
         debug(body)
-
         assert(body.length === 5)
-        body.forEach(row => {
-          assert(row._count > 0)
-        })
 
         done()
 
