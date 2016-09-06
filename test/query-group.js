@@ -37,7 +37,7 @@ describe ('group', function () {
 
   })
 
-  it ('should return 200 | get /seat, include house, group = house_id', function (done) {
+  it ('should return 200 | get /character, group = house_id', function (done) {
 
     const querystring = qs.stringify({
       _group: ['house_id']
@@ -54,11 +54,39 @@ describe ('group', function () {
         let body = res.body
         assert(Array.isArray(body))
         debug(body)
-
         assert(body.length === 5)
-        body.forEach(row => {
-          assert(row._count > 0)
-        })
+
+        done()
+
+      })
+
+  })
+
+  it ('should return 200 | get /character, group = house_id, with count', function (done) {
+
+    const querystring = qs.stringify({
+      _attributes: [
+        [
+          'count(`character`.`id`)',
+          'count'
+        ]
+      ],
+      _group: ['house_id']
+    })
+
+    server
+      .get(`/gameofthrones/character?${querystring}`)
+      .expect(200)
+      .expect('X-Range', `objects 0-5/5`)
+      .end((err, res) => {
+
+        debug(res.headers)
+        if (err) return done(err)
+        let body = res.body
+        assert(Array.isArray(body))
+        debug(body)
+        assert(body.length === 5)
+        body.forEach(row => assert(row.count))
 
         done()
 
