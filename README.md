@@ -347,9 +347,9 @@ npm test
 
 MIT
 
-[travis-image]: https://img.shields.io/travis/Meituan-Dianping/koa-restql/master.svg?maxAge=2592000
+[travis-image]: https://img.shields.io/travis/Meituan-Dianping/koa-restql/master.svg?maxAge=0
 [travis-url]: https://travis-ci.org/Meituan-Dianping/koa-restql
-[npm-image]: https://img.shields.io/npm/v/koa-restql.svg?maxAge=2592000
+[npm-image]: https://img.shields.io/npm/v/koa-restql.svg?maxAge=0
 [npm-url]: https://www.npmjs.com/package/koa-restql
 [1]: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 [2]: #querystring
