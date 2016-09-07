@@ -71,6 +71,41 @@ describe ('order', function () {
       })
 
   })
+
+  it ('should return 200 | get /user, with order', function (done) {
+
+    const order = 'id DESC'
+
+    const querystring = qs.stringify({
+      _order: order
+    })
+
+    server
+      .get(`/user?${querystring}`)
+      .expect(200)
+      .end((err, res) => {
+
+        if (err) return done(err)
+        let body = res.body
+        assert(Array.isArray(body))
+        debug(body)
+
+        models.user.findAll({ order }).then(users => {
+
+          assert(body.length === users.length)
+
+          users.forEach((user, index) => {
+            assert(user.id === body[index].id)
+            assert(user.name === body[index].name)
+          })
+          
+          done()
+          
+        })
+
+      })
+
+  })
   
   it ('should return 200 | get /user/:id/characters, with order', function (done) {
 
