@@ -11,6 +11,8 @@ Now it works perfectly with MySQL.
 
 ## Installation
 
+koa-restql requires node v6.0.0 or higher for (partial) ES2015 support.
+
 ```sh
 npm install --save koa-restql
 ```
