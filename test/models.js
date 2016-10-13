@@ -488,6 +488,17 @@ describe ('model routers', function () {
         })
     })
 
+    it ('should return 404 | get /user/:id', function (done) {
+
+      const id = 100
+
+      server
+        .get(`/user/${id}`)
+        .expect(404)
+        .end(done)
+
+    })
+
     it ('should return 200 | put /user/:id', function (done) {
 
       const id = 1
