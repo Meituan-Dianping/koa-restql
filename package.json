@@ -14,14 +14,14 @@
     "url": "ssh://git@git.sankuai.com/mit/koa-restql.git"
   },
   "dependencies": {
-    "koa-router": "^5.3.0",
+    "koa-router": "^5.4.0",
     "co-body": "^4.0.0",
     "lodash": "^4.15.0",
     "qs": "^6.2.0",
     "debug": "^2.2.0"
   },
   "devDependencies": {
-    "koa": "^1.2.0",
+    "koa": "^1.2.4",
     "mysql": "^2.10.2",
     "node-uuid": "^1.4.7",
     "sequelize": "^3.24.0",
